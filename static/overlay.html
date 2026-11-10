@@ -1349,19 +1349,19 @@
             // 3. VẼ THẺ TÊN PHẬT TỬ CỠ LỚN (SIÊU RÕ NÉT, VIỀN VÀNG ĐẬM DƯỚI LƯNG NHÂN VẬT)
             c.save();
             const cleanName = name.length > 13 ? name.substring(0, 12) + "…" : name;
-            const nameFontPx = cleanName.length > 10 ? 44 : 50;
+            const nameFontPx = cleanName.length > 10 ? 46 : 54;
             c.font = `900 ${nameFontPx}px 'Segoe UI', Tahoma, Arial, sans-serif`;
             const textW = c.measureText(cleanName).width;
-            const avatarRadius = 32;
-            const pillH = 88;
-            const pillW = Math.min(Math.max(avatarRadius * 2 + textW + 46, 260), 504);
+            const avatarRadius = 33;
+            const pillH = 92;
+            const pillW = Math.min(Math.max(avatarRadius * 2 + textW + 48, 268), 506);
             const pillX = 256 - pillW / 2;
-            const pillY = 482;
+            const pillY = 480;
 
-            c.fillStyle = "rgba(8, 5, 12, 0.94)";
+            c.fillStyle = "rgba(6, 4, 10, 0.96)";
             c.strokeStyle = isVip ? "#ffd700" : "#ffca28";
-            c.lineWidth = isVip ? 4.5 : 3.4;
-            c.shadowColor = "rgba(0, 0, 0, 0.95)";
+            c.lineWidth = isVip ? 4.8 : 3.8;
+            c.shadowColor = "rgba(0, 0, 0, 0.98)";
             c.shadowBlur = 10;
 
             c.beginPath();
@@ -1371,7 +1371,7 @@
             c.stroke();
 
             // Vòng tròn Avatar bên trái thẻ tên
-            const avCenterX = pillX + 42;
+            const avCenterX = pillX + 43;
             const avCenterY = pillY + pillH / 2;
             c.shadowBlur = 0;
             c.fillStyle = p.avatarBg;
@@ -1379,26 +1379,27 @@
             c.arc(avCenterX, avCenterY, avatarRadius, 0, Math.PI * 2);
             c.fill();
             c.strokeStyle = "#ffd700";
-            c.lineWidth = 3.0;
+            c.lineWidth = 3.2;
             c.stroke();
 
             // Biểu tượng trong vòng tròn Avatar
-            c.font = "32px 'Segoe UI Emoji', sans-serif";
+            c.font = "34px 'Segoe UI Emoji', sans-serif";
             c.textAlign = "center";
             c.textBaseline = "middle";
             c.fillStyle = "#ffffff";
             c.fillText(p.badge, avCenterX, avCenterY + 2);
 
-            // Tên Phật tử chữ CỰC LỚN, có viền đen chống lóa + màu vàng kim / trắng sáng rực
+            // Tên Phật tử chữ CỰC LỚN (54px), có viền đen dày 8px chống lóa + màu vàng kim / trắng sáng rực
             c.font = `900 ${nameFontPx}px 'Segoe UI', Tahoma, Arial, sans-serif`;
             c.textAlign = "left";
             c.textBaseline = "middle";
-            const textX = pillX + 84;
+            const textX = pillX + 86;
             const textY = avCenterY + 1;
-            c.lineWidth = 7;
+            c.lineWidth = 8;
+            c.lineJoin = "round";
             c.strokeStyle = "#000000";
             c.strokeText(cleanName, textX, textY);
-            c.fillStyle = isVip ? "#ffe066" : "#ffffff";
+            c.fillStyle = isVip ? "#ffd700" : "#fffde7";
             c.fillText(cleanName, textX, textY);
             c.restore();
 
