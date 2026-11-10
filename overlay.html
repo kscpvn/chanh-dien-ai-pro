@@ -12,6 +12,8 @@
             document.head.appendChild(baseEl);
         }
     </script>
+    <link rel="preload" as="audio" href="static/audio/tung_kinh_fast_start.mp3?v=fast1">
+    <link rel="preload" as="image" href="static/buddha_temple_3d.jpg?v=daihung_cranes_v3">
     <script src="static/three.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; }
@@ -120,17 +122,20 @@
         /* 1. CỬA SỔ CHAT TRỰC TIẾP: HỖ TRỢ THU NHỎ (-), MỞ RỘNG (+), VÀ ẨN MỜ TRONG SUỐT ĐỂ KHÔNG CHE CHỖ NGỒI */
         .live-chat-panel {
             position: absolute; bottom: 58px; left: 6px; width: 328px; z-index: 50;
-            background: rgba(12, 10, 16, 0.42);
-            border: 1px solid rgba(212, 175, 55, 0.48);
+            background: rgba(12, 8, 6, 0.22);
+            border: 1px solid rgba(212, 175, 55, 0.32);
             border-radius: 10px; padding: 5px 7px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.45);
-            backdrop-filter: blur(2px);
+            box-shadow: none;
+            backdrop-filter: none;
+            opacity: 0.34;
             transition: all 0.22s ease;
             pointer-events: auto;
         }
         .live-chat-panel:hover, .live-chat-panel:focus-within {
-            background: rgba(14, 10, 18, 0.78);
+            opacity: 0.94;
+            background: rgba(14, 10, 18, 0.86);
             border-color: rgba(255, 215, 0, 0.85);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.55);
         }
         /* Chế độ Ẩn Mờ (Ghost Mode) - nhìn xuyên thấu chỗ ngồi bên dưới */
         .live-chat-panel.ghost-mode {
@@ -387,22 +392,22 @@
 
         /* BẢNG TẤM LÒNG THÀNH NỔI MỜ & CHO PHÉP THU GỌN ĐỂ KHÔNG CHE CHỖ NGỒI BÊN PHẢI */
         .leaderboard {
-            position: absolute; bottom: 58px; right: 6px; width: 168px; z-index: 30;
-            background: rgba(22, 10, 5, 0.45);
-            border: 1px solid rgba(212, 175, 55, 0.55); border-radius: 8px; padding: 5px 7px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+            position: absolute; bottom: 58px; right: 6px; width: 170px; z-index: 30;
+            background: rgba(32, 16, 8, 0.78);
+            border: 1.5px solid rgba(212, 175, 55, 0.75); border-radius: 9px; padding: 5px 8px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.65);
             backdrop-filter: blur(2px);
             transition: all 0.2s ease;
         }
-        .leaderboard:hover { background: rgba(28, 12, 6, 0.85); }
+        .leaderboard:hover { background: rgba(38, 18, 8, 0.92); }
         .leaderboard.minimized #lb-list { display: none; }
         .leaderboard-header {
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 2px; margin-bottom: 3px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.35); padding-bottom: 3px; margin-bottom: 4px;
             cursor: pointer;
         }
         .leaderboard-header h3 {
-            font-size: 9.5px; color: #ffd700; letter-spacing: 0.5px; font-weight: 800;
+            font-size: 9.5px; color: #ffd700; letter-spacing: 0.4px; font-weight: 800;
             text-shadow: 0 1px 2px #000;
         }
         .lb-toggle-btn {
@@ -410,13 +415,15 @@
             padding: 0px 4px; border-radius: 4px; border: 1px solid rgba(255,215,0,0.4);
         }
         .lb-row {
-            display: flex; justify-content: space-between; font-size: 9.5px; margin-bottom: 2px;
+            display: flex; justify-content: space-between; font-size: 9.8px; margin-bottom: 2.5px;
             color: #fff8dc; text-shadow: 0 1px 2px #000;
         }
         .lb-row span:last-child { color: #ffd700; font-weight: bold; }
     </style>
 </head>
 <body>
+    <!-- PHÁT NGAY TIẾNG GÕ MÕ & TỤNG KINH TỪ MILI-GIÂY ĐẦU TIÊN KHI TRUY CẬP (FILE 177KB NẠP TỨC THÌ 0ms) -->
+    <audio id="instant-sutra-audio" src="static/audio/tung_kinh_fast_start.mp3?v=fast1" preload="auto" autoplay loop playsinline webkit-playsinline style="display:none;"></audio>
 
     <!-- LỚP CANVAS 3D WEBGL (HỖ TRỢ BẤM TRỰC TIẾP LÊN SÀN ĐỂ ĐỔI CHỖ HOẶC BẤM VÀO PHẬT TỬ ĐỂ CHAT) -->
     <canvas id="webgl-canvas" title="Bấm vào đệm ngồi bất kỳ để đi bộ tới đó, hoặc bấm vào Phật tử khác để trò chuyện"></canvas>
@@ -425,11 +432,11 @@
     <!-- CÁC THÀNH PHẦN HUD GIAO DIỆN -->
     <div class="top-left-live">
         <span class="live-dot"></span>
-        <span>CHÁNH ĐIỆN 3D • <span id="seat-capacity-label">36/1.000</span> chỗ</span>
+        <span>CHÁNH ĐIỆN 3D • <span id="seat-capacity-label">43/1.000</span> chỗ</span>
     </div>
 
     <div class="top-right-stats">
-        🔥 <span id="incense-count">701</span> hương • ✨ <span id="merit-count">25.201</span> CĐ
+        🔥 <span id="incense-count">1.291</span> hương • 🪷 <span id="merit-count">18.645</span> CĐ
     </div>
 
     <div id="audio-unlock-btn" onclick="unlockAndTestAudio()" style="
@@ -638,7 +645,7 @@
                 </div>
             </div>
 
-            <!-- Khối chọn Vật Phẩm Hương Đèn (Mã QR gọn nhẹ chỉ nằm bên trong mục Hương Đèn, không hiện số tài khoản phản cảm) -->
+            <!-- Khối chọn Vật Phẩm Hương Đèn (Hiển thị đầy đủ Mã QR và Số Tài Khoản bên trong mục Hương Đèn như cũ) -->
             <div class="modal-field" id="field-lamp-select" style="display:none;">
                 <label>🏮 Chọn Lễ Vật Dâng Hương Đèn Tam Bảo:</label>
                 <select id="sel-lamp-offering">
@@ -647,14 +654,17 @@
                     <option value="HOA SEN VÀNG CÚNG PHẬT|10">🪷 Hoa Sen Vàng Cúng Phật (+200 Công Đức)</option>
                     <option value="ĐẠI HỒNG CHUNG CẦU QUỐC THÁI|25">🔔 Đại Hồng Chung Cầu Quốc Thái (+500 Công Đức)</option>
                 </select>
-                <div style="margin-top:7px; text-align:center;">
-                    <button type="button" onclick="const box=document.getElementById('discreet-qr-box'); box.style.display=(box.style.display==='none'?'block':'none');" style="background:rgba(255,215,0,0.14); border:1px dashed rgba(255,215,0,0.65); color:#ffe082; border-radius:8px; padding:5px 10px; font-size:10.5px; font-weight:700; cursor:pointer; width:100%;">
-                        🙏 Gieo duyên hỷ cúng Hương Đèn Tam Bảo (Bấm để mở mã QR)
-                    </button>
-                    <div id="discreet-qr-box" style="display:none; margin-top:7px; background:rgba(0,0,0,0.45); padding:8px; border-radius:10px; border:1px solid rgba(255,215,0,0.5);">
-                        <img id="modal-qr-img" src="static/qr_vpbank_square.png?v=614577808" style="width:130px; height:130px; border-radius:8px; background:#fff; padding:4px; margin:0 auto; display:block;" alt="QR Hỷ Cúng Hương Đèn">
-                        <div style="font-size:10px; color:#ffecb3; margin-top:4px;">Quét mã QR tùy tâm công đức hương đèn Tam Bảo 🙏</div>
+                <div id="discreet-qr-box" style="margin-top:8px; background:rgba(0,0,0,0.52); padding:10px; border-radius:10px; border:1.5px solid #ffd700; text-align:center;">
+                    <div style="font-size:11px; font-weight:800; color:#ffd700; margin-bottom:6px; letter-spacing:0.3px;">
+                        🙏 THÔNG TIN CÔNG ĐỨC HƯƠNG ĐÈN TAM BẢO 🙏
                     </div>
+                    <img id="modal-qr-img" src="static/qr_vpbank_vuong.png?v=614577808" style="width:170px; border-radius:10px; background:#fff; padding:4px; margin:0 auto; display:block; box-shadow:0 4px 14px rgba(0,0,0,0.65);" alt="QR VPBank Nguyễn Bá Vương">
+                    <div style="margin-top:7px; font-size:11.5px; line-height:1.45; color:#fff8dc;">
+                        Ngân hàng: <b id="lbl-bank-id" style="color:#4ade80;">VPBank</b> • STK: <b id="lbl-acc-no" style="color:#ffd700; font-size:13.5px; letter-spacing:0.5px;">614577808</b>
+                        <button type="button" id="btn-copy-stk" onclick="copyBankAccount()" style="background:#ffd700; color:#3a0d07; border:none; border-radius:5px; padding:2px 7px; font-size:10px; font-weight:800; cursor:pointer; margin-left:4px;">📋 Copy</button><br>
+                        Chủ TK: <b id="lbl-acc-name" style="color:#ffffff;">NGUYEN BA VUONG</b>
+                    </div>
+                    <div style="font-size:9.8px; color:#ffecb3; margin-top:4px;">Quét mã QR hoặc chuyển khoản tùy tâm công đức hương đèn Tam Bảo 🙏</div>
                 </div>
             </div>
 
@@ -700,9 +710,9 @@
             camera.updateProjectionMatrix();
         });
 
-        // 2. BỐI CẢNH CHÁNH ĐIỆN RỒNG PHƯỢNG, ĐÈN NHANG, HOA SEN & THẢM ĐỎ TRUNG ĐẠO (ĐÃ CĂN THẲNG ĐỐI XỨNG 100%)
+        // 2. BỐI CẢNH ĐẠI HÙNG BẢO ĐIỆN (HOÀNH PHI RỒNG VÀNG, ĐÔI HẠC ĐỨNG TRÊN LƯNG RÙA, ĐỈNH ĐỒNG & THẢM ĐỎ TRUNG ĐẠO)
         const textureLoader = new THREE.TextureLoader();
-        const templeTexture = textureLoader.load("static/buddha_temple_3d.jpg?v=straight_sym_v2");
+        const templeTexture = textureLoader.load("static/buddha_temple_3d.jpg?v=daihung_cranes_v3");
         if (templeTexture.colorSpace !== undefined) {
             templeTexture.colorSpace = THREE.SRGBColorSpace;
         } else if (THREE.sRGBEncoding) {
@@ -1987,6 +1997,27 @@
             return sharedAudioCtx;
         }
 
+        let fullSutraLoopPlayer = null;
+        let fullSutraReady = false;
+        let wasDuckingRecently = false;
+
+        function ensureFullSutraPreloaded() {
+            if (fullSutraLoopPlayer) return;
+            try {
+                fullSutraLoopPlayer = new Audio("static/audio/tung_kinh_chu_dai_bi.mp3?v=fast1");
+                fullSutraLoopPlayer.preload = "auto";
+                fullSutraLoopPlayer.loop = true;
+                fullSutraLoopPlayer.playsInline = true;
+                fullSutraLoopPlayer.setAttribute("playsinline", "true");
+                fullSutraLoopPlayer.setAttribute("webkit-playsinline", "true");
+                fullSutraLoopPlayer.addEventListener("canplaythrough", () => {
+                    fullSutraReady = true;
+                }, { once: true });
+                fullSutraLoopPlayer.load();
+            } catch (e) {}
+        }
+        setTimeout(ensureFullSutraPreloaded, 900);
+
         function syncMp3Players() {
             if (!ambientAudioStarted) return;
             const mode = audioSettings.sutra_mode || "mp3_kinh_phat";
@@ -2014,23 +2045,52 @@
             }
 
             if (isMp3ChantMode) {
-                const targetSrc = mode === "mp3_tam_kinh"
+                const isTamKinh = (mode === "mp3_tam_kinh");
+                const targetSrc = isTamKinh
                     ? "static/audio/niem_phat.mp3?v=2"
-                    : "static/audio/tung_kinh_chu_dai_bi.mp3?v=trithoat_hq";
+                    : "static/audio/tung_kinh_fast_start.mp3?v=fast1";
                 if (!bgSutraMp3Player) {
-                    bgSutraMp3Player = new Audio(targetSrc);
+                    const domInstant = !isTamKinh ? document.getElementById("instant-sutra-audio") : null;
+                    bgSutraMp3Player = domInstant || new Audio(targetSrc);
                     bgSutraMp3Player.loop = true;
                     bgSutraMp3Player.playsInline = true;
                     bgSutraMp3Player.setAttribute("playsinline", "true");
-                } else if (!bgSutraMp3Player.src.includes(targetSrc.split("?")[0])) {
+                    bgSutraMp3Player.setAttribute("webkit-playsinline", "true");
+                    if (!isTamKinh) {
+                        bgSutraMp3Player.addEventListener("timeupdate", () => {
+                            if (fullSutraReady && fullSutraLoopPlayer && bgSutraMp3Player !== fullSutraLoopPlayer && bgSutraMp3Player.currentTime >= 16.8) {
+                                try {
+                                    const curT = bgSutraMp3Player.currentTime;
+                                    const curV = bgSutraMp3Player.volume;
+                                    const wasPaused = bgSutraMp3Player.paused;
+                                    fullSutraLoopPlayer.currentTime = curT;
+                                    fullSutraLoopPlayer.volume = curV;
+                                    if (!wasPaused && !isVoiceDuckingActive()) {
+                                        fullSutraLoopPlayer.play().then(() => {
+                                            bgSutraMp3Player.pause();
+                                            bgSutraMp3Player = fullSutraLoopPlayer;
+                                        }).catch(() => {});
+                                    }
+                                } catch (e) {}
+                            }
+                        });
+                    }
+                } else if (isTamKinh && !bgSutraMp3Player.src.includes("niem_phat.mp3")) {
                     bgSutraMp3Player.pause();
                     bgSutraMp3Player = new Audio(targetSrc);
                     bgSutraMp3Player.loop = true;
                     bgSutraMp3Player.playsInline = true;
                     bgSutraMp3Player.setAttribute("playsinline", "true");
+                } else if (!isTamKinh && bgSutraMp3Player.src.includes("niem_phat.mp3")) {
+                    bgSutraMp3Player.pause();
+                    bgSutraMp3Player = (fullSutraReady && fullSutraLoopPlayer)
+                        ? fullSutraLoopPlayer
+                        : (document.getElementById("instant-sutra-audio") || new Audio(targetSrc));
+                    bgSutraMp3Player.loop = true;
                 }
-                const baseChant = Math.min(1.0, Math.max(0.15, (audioSettings.chant_volume || 1.5) * 0.65));
+                const baseChant = Math.min(1.0, Math.max(0.25, (audioSettings.chant_volume || 1.5) * 0.68));
                 if (ducking) {
+                    wasDuckingRecently = true;
                     if (chantFadeInterval) {
                         clearInterval(chantFadeInterval);
                         chantFadeInterval = null;
@@ -2045,8 +2105,14 @@
                         }
                     }
                 } else {
+                    if (!wasDuckingRecently) {
+                        // Khi mới vào trang: phát ngay ở mức âm lượng chuẩn 100% từ mili-giây 0 (không chờ fade-in)
+                        try { bgSutraMp3Player.volume = baseChant; } catch (e) {}
+                    }
                     if (bgSutraMp3Player.paused) {
-                        try { bgSutraMp3Player.volume = 0.06; } catch (e) {}
+                        if (wasDuckingRecently) {
+                            try { bgSutraMp3Player.volume = 0.14; } catch (e) {}
+                        }
                         bgSutraMp3Player.play().then(() => {
                             const btn = document.getElementById("audio-unlock-btn");
                             if (btn) btn.style.display = "none";
@@ -2054,22 +2120,27 @@
                     }
                     // Tăng dần (Fade-in) âm lượng tụng kinh trở lại mượt mà sau khi AI đọc xong
                     if (chantFadeInterval) clearInterval(chantFadeInterval);
-                    let curV = 0.08;
-                    try { curV = Math.max(0.06, Math.min(baseChant, bgSutraMp3Player.volume || 0.08)); } catch (e) {}
-                    if (Math.abs(curV - baseChant) > 0.04) {
-                        chantFadeInterval = setInterval(() => {
-                            if (isVoiceDuckingActive() || !bgSutraMp3Player) {
-                                clearInterval(chantFadeInterval);
-                                chantFadeInterval = null;
-                                return;
-                            }
-                            curV = Math.min(baseChant, curV + 0.12);
-                            try { bgSutraMp3Player.volume = curV; } catch (e) {}
-                            if (curV >= baseChant - 0.01) {
-                                clearInterval(chantFadeInterval);
-                                chantFadeInterval = null;
-                            }
-                        }, 90);
+                    if (wasDuckingRecently) {
+                        wasDuckingRecently = false;
+                        let curV = 0.14;
+                        try { curV = Math.max(0.12, Math.min(baseChant, bgSutraMp3Player.volume || 0.14)); } catch (e) {}
+                        if (Math.abs(curV - baseChant) > 0.04) {
+                            chantFadeInterval = setInterval(() => {
+                                if (isVoiceDuckingActive() || !bgSutraMp3Player) {
+                                    clearInterval(chantFadeInterval);
+                                    chantFadeInterval = null;
+                                    return;
+                                }
+                                curV = Math.min(baseChant, curV + 0.16);
+                                try { bgSutraMp3Player.volume = curV; } catch (e) {}
+                                if (curV >= baseChant - 0.01) {
+                                    clearInterval(chantFadeInterval);
+                                    chantFadeInterval = null;
+                                }
+                            }, 75);
+                        } else {
+                            try { bgSutraMp3Player.volume = baseChant; } catch (e) {}
+                        }
                     } else {
                         try { bgSutraMp3Player.volume = baseChant; } catch (e) {}
                     }
@@ -2290,9 +2361,51 @@
             } catch (e) {}
         }
 
-        // Đã tắt hoàn toàn tiếng gõ mõ điện tử theo yêu cầu
-        function playWoodenFishSound() {}
-        function playWoodenFishBurst() {}
+        // Tiếng gõ mõ gỗ mít chùa cổ trầm ấm ("cốc... cốc...") vang lên ngay lập tức khi vào trang
+        function playWoodenFishSound(volScale = 1.0) {
+            if (isVoiceDuckingActive()) return;
+            try {
+                const ctx = getAudioCtx();
+                if (!ctx || ctx.state !== "running") return;
+                const now = ctx.currentTime;
+
+                // Thân mõ gỗ rỗng trầm ấm (420Hz -> 385Hz)
+                const bodyOsc = ctx.createOscillator();
+                const bodyGain = ctx.createGain();
+                bodyOsc.type = "triangle";
+                bodyOsc.frequency.setValueAtTime(425, now);
+                bodyOsc.frequency.exponentialRampToValueAtTime(385, now + 0.085);
+                bodyGain.gain.setValueAtTime(0.001, now);
+                bodyGain.gain.linearRampToValueAtTime(0.28 * volScale, now + 0.006);
+                bodyGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.14);
+                bodyOsc.connect(bodyGain);
+                bodyGain.connect(masterCompressor);
+                bodyOsc.start(now);
+                bodyOsc.stop(now + 0.15);
+
+                // Âm bồi dùi gỗ gõ vào miệng mõ (840Hz)
+                const rimOsc = ctx.createOscillator();
+                const rimGain = ctx.createGain();
+                rimOsc.type = "sine";
+                rimOsc.frequency.setValueAtTime(845, now);
+                rimOsc.frequency.exponentialRampToValueAtTime(760, now + 0.045);
+                rimGain.gain.setValueAtTime(0.001, now);
+                rimGain.gain.linearRampToValueAtTime(0.14 * volScale, now + 0.003);
+                rimGain.gain.exponentialRampToValueAtTime(0.0005, now + 0.055);
+                rimOsc.connect(rimGain);
+                rimGain.connect(masterCompressor);
+                rimOsc.start(now);
+                rimOsc.stop(now + 0.06);
+            } catch (e) {}
+        }
+
+        function playWoodenFishBurst(beats = 3, intervalMs = 460) {
+            for (let i = 0; i < beats; i++) {
+                setTimeout(() => {
+                    if (!isVoiceDuckingActive()) playWoodenFishSound(0.95);
+                }, i * intervalMs);
+            }
+        }
 
         function playLifeReleaseChime() {
             try {
@@ -2408,15 +2521,25 @@
         }
 
         // =========================================================================
-        // 11. PHÁT TỤNG KINH & NHẠC THIỀN MẶC ĐỊNH TỰ ĐỘNG NGAY KHI VÀO TRANG (KHÔNG CẦN BẤM NÚT)
+        // 11. PHÁT TIẾNG GÕ MÕ & TỤNG KINH MẶC ĐỊNH TỨC THÌ NGAY KHI TRUY CẬP (0ms)
         // =========================================================================
         let ambientAudioStarted = false;
+        let initialWoodenFishDone = false;
         function startAmbientMeditationMusic() {
             ambientAudioStarted = true;
             syncMp3Players();
+            if (!initialWoodenFishDone && !isVoiceDuckingActive()) {
+                try {
+                    const ctx = getAudioCtx();
+                    if (ctx && ctx.state === "running") {
+                        initialWoodenFishDone = true;
+                        playWoodenFishBurst(4, 460);
+                    }
+                } catch (e) {}
+            }
         }
 
-        // Tự động phát kinh mặc định ngay lập tức khi mở trang
+        // Tự động phát tiếng gõ mõ & tụng kinh mặc định ngay lập tức ở mili-giây 0 khi mở trang
         startAmbientMeditationMusic();
         window.addEventListener("DOMContentLoaded", () => {
             startAmbientMeditationMusic();
@@ -2424,11 +2547,17 @@
         window.addEventListener("load", () => {
             startAmbientMeditationMusic();
         });
-        // Nếu trình duyệt chặn tự phát âm thanh ở mili-giây đầu, tự động kích hoạt ẩn ngay khi chạm/di chuột bất kỳ đâu (không hiện nút bấm)
-        ["pointerdown", "pointermove", "touchstart", "touchend", "wheel", "keydown", "click"].forEach((evtName) => {
+        window.addEventListener("pageshow", () => {
+            startAmbientMeditationMusic();
+        });
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden) startAmbientMeditationMusic();
+        });
+        // Nếu trình duyệt chặn tự phát âm thanh ở mili-giây đầu, tự động kích hoạt ngay khi có bất kỳ chuyển động/chạm nhẹ nào
+        ["pointerdown", "pointermove", "mouseover", "touchstart", "touchmove", "touchend", "wheel", "scroll", "keydown", "click"].forEach((evtName) => {
             window.addEventListener(evtName, () => {
                 unlockMobileVoicePlayers();
-                if (!ambientAudioStarted || (bgSutraMp3Player && bgSutraMp3Player.paused && !isVoiceDuckingActive())) {
+                if (!initialWoodenFishDone || !ambientAudioStarted || (bgSutraMp3Player && bgSutraMp3Player.paused && !isVoiceDuckingActive())) {
                     unlockAndTestAudio();
                 }
             }, { passive: true });
@@ -2885,27 +3014,28 @@
 
         function loadCloudGlobalStats() {
             try {
-                const raw = localStorage.getItem("chanhdien_cloud_stats_v1");
+                const raw = localStorage.getItem("chanhdien_cloud_stats_v2");
                 if (raw) return JSON.parse(raw);
             } catch (e) {}
             return {
-                incense: 1286,
-                merit: 18540,
+                incense: 1291,
+                merit: 18645,
                 wooden_fish: 3680,
                 leaderboard: [
                     { name: "Đại Thí Chủ M", score: 1850 },
                     { name: "Diệu Thảo Tâm", score: 1440 },
                     { name: "Nguyễn Bá Vương", score: 1280 },
                     { name: "Q.nhuo", score: 960 },
-                    { name: "Tuyết Nhi", score: 850 }
+                    { name: "Tuyết Nhi", score: 850 },
+                    { name: "Minh Huy", score: 755 }
                 ]
             };
         }
 
         function updateCloudGlobalStats(userName, addMerit = 5, addIncense = 1) {
             const st = loadCloudGlobalStats();
-            st.incense = (st.incense || 1280) + addIncense;
-            st.merit = (st.merit || 18500) + addMerit;
+            st.incense = (st.incense || 1291) + addIncense;
+            st.merit = (st.merit || 18645) + addMerit;
             st.wooden_fish = (st.wooden_fish || 3680) + 1;
             const cleanName = (userName || "Phật Tử Thiện Tâm").trim();
             const found = st.leaderboard.find(item => item.name.toLowerCase() === cleanName.toLowerCase());
@@ -2915,9 +3045,9 @@
                 st.leaderboard.push({ name: cleanName, score: 650 + addMerit });
             }
             st.leaderboard.sort((a, b) => b.score - a.score);
-            st.leaderboard = st.leaderboard.slice(0, 8);
+            st.leaderboard = st.leaderboard.slice(0, 6);
             try {
-                localStorage.setItem("chanhdien_cloud_stats_v1", JSON.stringify(st));
+                localStorage.setItem("chanhdien_cloud_stats_v2", JSON.stringify(st));
             } catch (e) {}
             return st;
         }
@@ -3533,9 +3663,9 @@
             document.getElementById("field-lamp-select").style.display = (mode === "lamp") ? "block" : "none";
             document.getElementById("field-wish-input").style.display = "block";
 
-            // Luôn đóng gọn hộp QR tùy chọn khi mới mở mục Hương Đèn để không gây phản cảm
+            // Hiển thị đầy đủ hộp QR và Số Tài Khoản bên trong mục Hương Đèn
             const qrBox = document.getElementById("discreet-qr-box");
-            if (qrBox) qrBox.style.display = "none";
+            if (qrBox) qrBox.style.display = "block";
 
             const chipsBox = document.getElementById("quick-wish-chips");
             chipsBox.innerHTML = preset.chips.map(c =>
