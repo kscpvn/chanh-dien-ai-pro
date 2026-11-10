@@ -390,11 +390,27 @@
             const text = document.getElementById("sim-text").value.trim() || "Cầu bình an tài lộc viên mãn";
 
             const mapEvent = {
-                stand_incense: { type: "STAND_INCENSE", user, text, avatar_type: "high_monk", merit_added: 15, highlight_btn: "incense", tts_url: "static/audio/tts/incense_1.mp3?v=loud1" },
-                sit_meditate:  { type: "SIT_MEDITATE", user, text, avatar_type: "high_monk", merit_added: 10, highlight_btn: "meditate", tts_url: "static/audio/tts/meditate_1.mp3?v=loud1" },
-                change_seat:   { type: "CHANGE_SEAT", user, text: "Đang đổi chỗ gần Phật", avatar_type: "high_monk", highlight_btn: "move", tts_url: "static/audio/tts/move_seat.mp3?v=loud1" },
-                set_name:      { type: "AVATAR_CHANGE", user, text, avatar_type: "high_monk", highlight_btn: "name", tts_url: "static/audio/tts/set_name.mp3?v=loud1" },
-                ask_fortune:   {
+                stand_incense: {
+                    type: "STAND_INCENSE", user, text, avatar_type: "high_monk", merit_added: 15, highlight_btn: "incense",
+                    tts_url: "static/audio/tts/incense_1.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Chứng minh công đức Phật tử ${user} thành tâm đứng lên bước tới bát hương dâng hương Tam Bảo, nguyện cầu: ${text}. Nguyện mười phương Chư Phật gia hộ cho Phật tử ${user} vạn sự bình an, sở cầu như ý.`
+                },
+                sit_meditate: {
+                    type: "SIT_MEDITATE", user, text, avatar_type: "high_monk", merit_added: 10, highlight_btn: "meditate",
+                    tts_url: "static/audio/tts/meditate_1.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} đang tịnh tâm ngồi thiền trên bồ đoàn Chánh Điện, nhất tâm nguyện cầu: ${text}. Chúc Phật tử ${user} thân tâm thường an lạc.`
+                },
+                change_seat: {
+                    type: "CHANGE_SEAT", user, text: "Đang đổi chỗ gần Phật", avatar_type: "high_monk", highlight_btn: "move",
+                    tts_url: "static/audio/tts/move_seat.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Hoan hỷ đón Phật tử ${user} di chuyển đến vị trí bồ đoàn trang nghiêm gần tôn tượng Đức Phật.`
+                },
+                set_name: {
+                    type: "AVATAR_CHANGE", user, text, avatar_type: "high_monk", highlight_btn: "name",
+                    tts_url: "static/audio/tts/set_name.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Chào mừng Phật tử ${user} đã an vị trang nghiêm trên Chánh Điện với lời nguyện cầu: ${text}.`
+                },
+                ask_fortune: {
                     type: "FORTUNE", user, text, avatar_type: "high_monk", highlight_btn: "fortune",
                     fortune: {
                         id: "Quẻ Số 01",
@@ -403,11 +419,13 @@
                         poem: "Phong vân hội tụ đất trời mở,\nCá vượt Vũ Môn hóa Rồng vàng.\nCông danh tài lộc đều rực rỡ,\nGia đạo bình an hưởng giàu sang.",
                         meaning: "Đại cát đại lợi. Mọi dự định công danh, đầu tư, thi cử hay cầu tài lộc đều gặp vận hội lớn."
                     },
-                    tts_url: "static/audio/tts/fortune_01.mp3?v=loud1"
+                    tts_url: "static/audio/tts/fortune_01.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm xin quẻ xăm: ${text}. Chúc mừng Phật tử ${user} đã rút được Quẻ Số 01, Thượng Thượng Cát, Long Môn Vũ Hóa. Đại cát đại lợi, mọi dự định đều gặp vận hội lớn.`
                 },
-                donate_lamp:   {
+                donate_lamp: {
                     type: "GIFT", user, gift_name: "ĐÈN HOA ĐĂNG LIÊN HOA", merit_added: 100, pop_qr_spotlight: true, highlight_btn: "lamp",
-                    tts_url: "static/audio/tts/lamp_1.mp3?v=loud1"
+                    tts_url: "static/audio/tts/lamp_1.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức vô lượng của Phật tử ${user} đã phát tâm ủng hộ hương đèn, dâng Đèn Hoa Đăng Liên Hoa cúng dường Tam Bảo. Chúc Phật tử ${user} phúc lộc viên mãn.`
                 }
             };
             if (mapEvent[actionType]) {
@@ -467,7 +485,8 @@
                     poem: "Một nén tâm hương thấu cửu trùng,\nĐèn sen tỏa sáng khắp hư không.\nCông đức vô lượng gia đường thịnh,\nPhước lộc綿 trường vạn sự thông.",
                     meaning: `Cảm tạ tấm lòng vàng của thí chủ ${donorName}: ${wish}`
                 },
-                tts_url: "static/audio/tts/honor_vpbank.mp3?v=loud1"
+                tts_url: "static/audio/tts/honor_vpbank.mp3?v=loud1",
+                tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức vô lượng của đại thí chủ ${donorName} đã phát tâm cúng dường hương đèn Tam Bảo số tiền ${amountVnd.toLocaleString('vi-VN')} đồng với tâm nguyện: ${wish}. Nguyện cầu mười phương Chư Phật gia hộ cho thí chủ ${donorName} cùng gia quyến phước lộc thọ toàn, vạn sự cát tường như ý.`
             });
 
             await fetch("/api/bank_webhook", {

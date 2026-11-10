@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="no-referrer">
     <title>Chánh Điện Online 3D Đại Hùng Bảo Điện - 1000 Chỗ Ngồi (24/7 Cloud)</title>
     <script>
         if (location.pathname.includes("/static/")) {
@@ -704,9 +705,9 @@
             camera.updateProjectionMatrix();
         });
 
-        // 2. BỐI CẢNH CHÁNH ĐIỆN RỒNG PHƯỢNG, ĐÈN NHANG, HOA SEN & THẢM ĐỎ TRUNG ĐẠO (SẠCH BỆ THẮP HƯƠNG)
+        // 2. BỐI CẢNH CHÁNH ĐIỆN RỒNG PHƯỢNG, ĐÈN NHANG, HOA SEN & THẢM ĐỎ TRUNG ĐẠO (ĐÃ CĂN THẲNG ĐỐI XỨNG 100%)
         const textureLoader = new THREE.TextureLoader();
-        const templeTexture = textureLoader.load("static/buddha_temple_3d.jpg?v=clean_altar_matrix");
+        const templeTexture = textureLoader.load("static/buddha_temple_3d.jpg?v=straight_sym_v2");
         if (templeTexture.colorSpace !== undefined) {
             templeTexture.colorSpace = THREE.SRGBColorSpace;
         } else if (THREE.sRGBEncoding) {
@@ -1031,17 +1032,17 @@
         const dummy = new THREE.Object3D();
         let seatIndex = 0;
 
-        // MA TRẬN 7 HÀNG x 6 CỘT ĐỐI XỨNG HAI BÊN THẢM ĐỎ (3 Cột Tả Vu + 3 Cột Hữu Vu = 42 Bồ đoàn chính)
-        // Hàng 0 bắt đầu ngay sát dưới chân bậc tam cấp (y = 1.02, z = 1.15) để lấp kín khoảng trống sàn gỗ,
-        // nhưng tuyệt đối không leo lên thềm Đỉnh Đồng (khu vực bàn thắp hương).
+        // MA TRẬN 7 HÀNG x 6 CỘT ĐỐI XỨNG THẲNG HÀNG HAI BÊN THẢM ĐỎ (3 Cột Tả Vu + 3 Cột Hữu Vu = 42 Bồ đoàn chính)
+        // Đã hiệu chỉnh bù phối cảnh (xsAbs tỉ lệ theo khoảng cách camera 9.2 - z) để 6 cột thẳng hàng dọc,
+        // không bị chéo và hiển thị trọn vẹn 100% cả 42 vị trí ngồi cùng bảng tên trong khung hình.
         const HALL_SEAT_ROWS = [
-            { y:  1.02, z: 1.15, xsAbs: [0.56, 1.12, 1.68], scale: 0.66 }, // Hàng Matrix 1: Sát dưới chân bậc tam cấp gần khu thắp hương
-            { y:  0.74, z: 1.45, xsAbs: [0.58, 1.16, 1.74], scale: 0.70 }, // Hàng Matrix 2
-            { y:  0.46, z: 1.75, xsAbs: [0.60, 1.20, 1.80], scale: 0.74 }, // Hàng Matrix 3
-            { y:  0.18, z: 2.05, xsAbs: [0.62, 1.24, 1.86], scale: 0.78 }, // Hàng Matrix 4
-            { y: -0.09, z: 2.35, xsAbs: [0.64, 1.28, 1.92], scale: 0.82 }, // Hàng Matrix 5
-            { y: -0.35, z: 2.65, xsAbs: [0.66, 1.32, 1.98], scale: 0.86 }, // Hàng Matrix 6
-            { y: -0.60, z: 2.95, xsAbs: [0.68, 1.36, 2.04], scale: 0.90 }  // Hàng Matrix 7 (Tiền đường)
+            { y:  1.02, z: 1.15, xsAbs: [0.52, 1.08, 1.64], scale: 0.72 }, // Hàng Matrix 1: Sát dưới chân bậc tam cấp
+            { y:  0.75, z: 1.45, xsAbs: [0.50, 1.04, 1.58], scale: 0.75 }, // Hàng Matrix 2
+            { y:  0.48, z: 1.75, xsAbs: [0.48, 1.00, 1.52], scale: 0.78 }, // Hàng Matrix 3
+            { y:  0.21, z: 2.05, xsAbs: [0.46, 0.96, 1.46], scale: 0.81 }, // Hàng Matrix 4
+            { y: -0.06, z: 2.35, xsAbs: [0.44, 0.92, 1.40], scale: 0.84 }, // Hàng Matrix 5
+            { y: -0.32, z: 2.65, xsAbs: [0.42, 0.88, 1.34], scale: 0.87 }, // Hàng Matrix 6
+            { y: -0.58, z: 2.95, xsAbs: [0.40, 0.84, 1.28], scale: 0.90 }  // Hàng Matrix 7 (Tiền đường)
         ];
 
         for (let r = 0; r < ROWS; r++) {
@@ -1292,71 +1293,76 @@
 
         function createDevoteeTexture(name, avatarType, isVip, message = "", pose = "SITTING", statusHint = "") {
             const cv = document.createElement("canvas");
-            cv.width = 512; cv.height = 680;
+            cv.width = 512; cv.height = 700;
             const c = cv.getContext("2d");
             const p = AVATAR_PALETTES[avatarType] || AVATAR_PALETTES.male;
 
-            // 1. VẼ NHÂN VẬT ÁO TRÀNG LAM (NGỒI THIỀN HOẶC ĐỨNG ĐI LÊN THẮP HƯƠNG)
+            // 1. VẼ NHÂN VẬT ÁO TRÀNG LAM (NGỒI THIỀN HOẶC ĐỨNG ĐI LÊN BÁT HƯƠNG)
             drawDevoteeFigure(c, avatarType, isVip, pose, name);
 
-            // 2. VẼ KHUNG LỜI CẦU NGUYỆN MÀU ĐEN MỜ BO GÓC PHÍA TRÊN ĐẦU (GIỐNG 100% ẢNH MẪU)
+            // 2. VẼ KHUNG LỜI CẦU NGUYỆN CHỮ TO RÕ PHÍA TRÊN ĐẦU
             const topText = statusHint || message;
             if (topText) {
                 c.save();
-                c.font = "600 28px 'Segoe UI', Tahoma, sans-serif";
-                const lines = wrapSpeechLines(c, topText, 380, 3);
+                c.font = "bold 36px 'Segoe UI', Tahoma, Arial, sans-serif";
+                const lines = wrapSpeechLines(c, topText, 440, 2);
                 if (lines.length > 0) {
                     let maxLineW = 0;
                     lines.forEach(l => {
                         const w = c.measureText(l).width;
                         if (w > maxLineW) maxLineW = w;
                     });
-                    const padX = 28;
-                    const lineH = 36;
-                    const boxW = Math.min(Math.max(maxLineW + padX * 2, 140), 460);
-                    const boxH = lines.length * lineH + 24;
+                    const padX = 26;
+                    const lineH = 44;
+                    const boxW = Math.min(Math.max(maxLineW + padX * 2, 180), 500);
+                    const boxH = lines.length * lineH + 22;
                     const boxX = 256 - boxW / 2;
-                    const boxY = Math.max(8, 138 - boxH);
+                    const boxY = Math.max(6, 134 - boxH);
 
-                    c.fillStyle = "rgba(18, 18, 22, 0.80)";
-                    c.strokeStyle = isVip ? "rgba(255, 215, 0, 0.65)" : "rgba(255, 255, 255, 0.22)";
-                    c.lineWidth = 2.2;
-                    c.shadowColor = "rgba(0, 0, 0, 0.75)";
+                    c.fillStyle = "rgba(10, 8, 14, 0.90)";
+                    c.strokeStyle = isVip ? "#ffd700" : "rgba(255, 235, 160, 0.65)";
+                    c.lineWidth = 3.0;
+                    c.shadowColor = "rgba(0, 0, 0, 0.85)";
                     c.shadowBlur = 8;
 
                     c.beginPath();
-                    if (c.roundRect) c.roundRect(boxX, boxY, boxW, boxH, 16);
+                    if (c.roundRect) c.roundRect(boxX, boxY, boxW, boxH, 18);
                     else c.rect(boxX, boxY, boxW, boxH);
                     c.fill();
                     c.stroke();
 
                     c.shadowBlur = 0;
-                    c.fillStyle = "#ffffff";
                     c.textAlign = "center";
                     c.textBaseline = "middle";
+                    c.lineWidth = 5;
+                    c.strokeStyle = "#000000";
+                    c.fillStyle = "#ffffff";
                     lines.forEach((line, idx) => {
-                        c.fillText(line, 256, boxY + 12 + (idx + 0.5) * lineH);
+                        const ly = boxY + 11 + (idx + 0.5) * lineH;
+                        c.strokeText(line, 256, ly);
+                        c.fillText(line, 256, ly);
                     });
                 }
                 c.restore();
             }
 
-            // 3. VẼ THẺ TÊN VIÊN THUỐC (NAME PILL) KÈM AVATAR TRÒN DƯỚI LƯNG (GIỐNG 100% ẢNH MẪU)
+            // 3. VẼ THẺ TÊN PHẬT TỬ CỠ LỚN (SIÊU RÕ NÉT, VIỀN VÀNG ĐẬM DƯỚI LƯNG NHÂN VẬT)
             c.save();
-            c.font = "bold 32px 'Segoe UI', Tahoma, sans-serif";
-            const cleanName = name.length > 12 ? name.substring(0, 11) + "…" : name;
+            const cleanName = name.length > 13 ? name.substring(0, 12) + "…" : name;
+            const nameFontPx = cleanName.length > 10 ? 44 : 50;
+            c.font = `900 ${nameFontPx}px 'Segoe UI', Tahoma, Arial, sans-serif`;
             const textW = c.measureText(cleanName).width;
-            const avatarRadius = 24;
-            const pillH = 58;
-            const pillW = Math.min(Math.max(avatarRadius * 2 + textW + 42, 190), 460);
+            const avatarRadius = 32;
+            const pillH = 88;
+            const pillW = Math.min(Math.max(avatarRadius * 2 + textW + 46, 260), 504);
             const pillX = 256 - pillW / 2;
-            const pillY = 505;
+            const pillY = 482;
 
-            c.fillStyle = "rgba(15, 15, 20, 0.86)";
-            c.strokeStyle = isVip ? "#ffd700" : "rgba(255, 255, 255, 0.28)";
-            c.lineWidth = isVip ? 3.2 : 2.0;
-            c.shadowColor = "rgba(0, 0, 0, 0.85)";
-            c.shadowBlur = 8;
+            c.fillStyle = "rgba(8, 5, 12, 0.94)";
+            c.strokeStyle = isVip ? "#ffd700" : "#ffca28";
+            c.lineWidth = isVip ? 4.5 : 3.4;
+            c.shadowColor = "rgba(0, 0, 0, 0.95)";
+            c.shadowBlur = 10;
 
             c.beginPath();
             if (c.roundRect) c.roundRect(pillX, pillY, pillW, pillH, pillH / 2);
@@ -1365,32 +1371,41 @@
             c.stroke();
 
             // Vòng tròn Avatar bên trái thẻ tên
-            const avCenterX = pillX + 30;
+            const avCenterX = pillX + 42;
             const avCenterY = pillY + pillH / 2;
             c.shadowBlur = 0;
             c.fillStyle = p.avatarBg;
             c.beginPath();
             c.arc(avCenterX, avCenterY, avatarRadius, 0, Math.PI * 2);
             c.fill();
-            c.strokeStyle = "#ffffff";
-            c.lineWidth = 2.2;
+            c.strokeStyle = "#ffd700";
+            c.lineWidth = 3.0;
             c.stroke();
 
-            // Biểu tượng / Chữ cái đại diện trong vòng tròn Avatar
-            c.font = "24px 'Segoe UI Emoji', sans-serif";
+            // Biểu tượng trong vòng tròn Avatar
+            c.font = "32px 'Segoe UI Emoji', sans-serif";
             c.textAlign = "center";
             c.textBaseline = "middle";
             c.fillStyle = "#ffffff";
-            c.fillText(p.badge, avCenterX, avCenterY + 1);
+            c.fillText(p.badge, avCenterX, avCenterY + 2);
 
-            // Tên Phật tử chữ trắng đậm bên phải Avatar
-            c.font = "bold 31px 'Segoe UI', Tahoma, sans-serif";
-            c.fillStyle = isVip ? "#ffe082" : "#ffffff";
+            // Tên Phật tử chữ CỰC LỚN, có viền đen chống lóa + màu vàng kim / trắng sáng rực
+            c.font = `900 ${nameFontPx}px 'Segoe UI', Tahoma, Arial, sans-serif`;
             c.textAlign = "left";
-            c.fillText(cleanName, pillX + 64, avCenterY + 1);
+            c.textBaseline = "middle";
+            const textX = pillX + 84;
+            const textY = avCenterY + 1;
+            c.lineWidth = 7;
+            c.strokeStyle = "#000000";
+            c.strokeText(cleanName, textX, textY);
+            c.fillStyle = isVip ? "#ffe066" : "#ffffff";
+            c.fillText(cleanName, textX, textY);
             c.restore();
 
             const tex = new THREE.CanvasTexture(cv);
+            tex.minFilter = THREE.LinearFilter;
+            tex.magFilter = THREE.LinearFilter;
+            tex.generateMipmaps = false;
             if (tex.colorSpace !== undefined) {
                 tex.colorSpace = THREE.SRGBColorSpace;
             } else if (THREE.sRGBEncoding) {
@@ -1419,9 +1434,9 @@
                 this.stateTimer = 0;
                 this.aisleLaneX = (Math.random() - 0.5) * 0.24; // Đi dọc trên thảm đỏ chính giữa
 
-                const depthScale = this.seat.customScale || 0.76;
-                this.baseScaleX = 0.74 * depthScale;
-                this.baseScaleY = 0.94 * depthScale;
+                const depthScale = this.seat.customScale || 0.78;
+                this.baseScaleX = 0.84 * depthScale;
+                this.baseScaleY = 0.98 * depthScale;
                 this.baseY = this.seat.y + 0.15 * this.baseScaleY;
 
                 this.currX = this.seat.x;
@@ -1488,9 +1503,9 @@
                 this.state = "SITTING";
                 this.pose = "SITTING";
                 this.statusHint = "";
-                const depthScale = this.seat.customScale || 0.76;
-                this.baseScaleX = 0.74 * depthScale;
-                this.baseScaleY = 0.94 * depthScale;
+                const depthScale = this.seat.customScale || 0.78;
+                this.baseScaleX = 0.84 * depthScale;
+                this.baseScaleY = 0.98 * depthScale;
                 this.baseY = this.seat.y + 0.15 * this.baseScaleY;
                 this.currX = this.seat.x;
                 this.currY = this.baseY;
@@ -1519,15 +1534,15 @@
             // CẬP NHẬT CHUYỂN ĐỘNG 60 FPS TRÊN THẢM ĐỎ & SÀN CHÁNH ĐIỆN
             updateMovement(time) {
                 if (!this.sprite) return;
-                const depthScale = this.seat.customScale || 0.76;
-                this.baseScaleX = 0.74 * depthScale;
-                this.baseScaleY = 0.94 * depthScale;
+                const depthScale = this.seat.customScale || 0.78;
+                this.baseScaleX = 0.84 * depthScale;
+                this.baseScaleY = 0.98 * depthScale;
                 this.baseY = this.seat.y + 0.15 * this.baseScaleY;
 
-                const stepSpeed = 0.024;
-                // Dừng đứng vái lạy trang nghiêm ngay sát chân bậc tam cấp trước Lư Hương (không bước lên bàn thờ)
-                const altarY = 1.28;
-                const altarZ = 0.90;
+                const stepSpeed = 0.026;
+                // Bước dọc thảm đỏ và lên bậc tam cấp tiến tận vị trí Bát Hương / Đỉnh Đồng để thắp hương
+                const altarY = 2.02;
+                const altarZ = 0.35;
 
                 if (this.state === "SITTING") {
                     const breath = Math.sin(time * 2.1 + this.breathPhase);
@@ -1559,19 +1574,24 @@
                     }
                 }
                 else if (this.state === "WALK_UP") {
+                    // Đi dọc thảm đỏ và bước lên bậc tam cấp tiến sát tới chính giữa Bát Hương (X -> 0, Y -> altarY, Z -> altarZ)
+                    const targetX = this.aisleLaneX * 0.35;
+                    const dx = targetX - this.currX;
                     const dy = altarY - this.currY;
                     const dz = altarZ - this.currZ;
-                    const dist = Math.hypot(dy, dz);
+                    const dist = Math.hypot(dx, dy, dz);
                     if (dist > 0.05) {
-                        this.currY += (dy / dist) * stepSpeed * 0.85;
+                        this.currX += (dx / dist) * stepSpeed * 0.65;
+                        this.currY += (dy / dist) * stepSpeed * 1.05;
                         this.currZ += (dz / dist) * stepSpeed * 1.15;
                     } else {
+                        this.currX = targetX;
                         this.currY = altarY;
                         this.currZ = altarZ;
                         this.state = "BOWING";
                         this.pose = "BOWING_INCENSE";
-                        this.statusHint = "Thành tâm dâng hương 🙏";
-                        this.stateTimer = performance.now() + 3200;
+                        this.statusHint = "🔥 Đang thắp hương tại Đỉnh Đồng 🙏";
+                        this.stateTimer = performance.now() + 4200;
                         this.refreshTexture();
                     }
                 }
@@ -1616,11 +1636,11 @@
                     }
                 }
 
-                const walkScale = THREE.MathUtils.lerp(0.36, 0.56, Math.min(Math.max((this.currZ - 0.5) / 2.6, 0), 1));
-                const bowDip = (this.state === "BOWING") ? Math.abs(Math.sin(time * 4.5)) * 0.03 : 0;
-                this.sprite.scale.set(walkScale * 0.85, walkScale * (1.18 - bowDip), 1);
+                const walkScale = THREE.MathUtils.lerp(0.52, 0.72, Math.min(Math.max((this.currZ - 0.3) / 2.6, 0), 1));
+                const bowDip = (this.state === "BOWING") ? Math.abs(Math.sin(time * 4.5)) * 0.04 : 0;
+                this.sprite.scale.set(walkScale * 0.90, walkScale * (1.20 - bowDip), 1);
                 this.sprite.position.set(this.currX, this.currY + walkBob - bowDip * 0.5, this.currZ);
-                this.sprite.renderOrder = Math.round(230 + this.currZ * 25);
+                this.sprite.renderOrder = Math.round(250 + this.currZ * 25);
             }
 
             destroy() {
@@ -1731,8 +1751,8 @@
                     bgSutraMp3Player.loop = true;
                 }
                 const baseChant = Math.min(1.0, Math.max(0.15, (audioSettings.chant_volume || 1.5) * 0.65));
-                // Auto-Ducking mạnh mẽ: hạ tiếng tụng kinh nền xuống 0.05 (5%) khi có giọng đọc lời khấn/quẻ xăm
-                bgSutraMp3Player.volume = isPlayingAudio ? 0.05 : baseChant;
+                // Auto-Ducking sâu: hạ tiếng tụng kinh nền xuống 0.02 (2%) khi AI đang đọc tên Phật tử & lời khấn/quẻ xăm
+                bgSutraMp3Player.volume = isPlayingAudio ? 0.02 : baseChant;
                 if (bgSutraMp3Player.paused) {
                     bgSutraMp3Player.play().then(() => {
                         const btn = document.getElementById("audio-unlock-btn");
@@ -1834,14 +1854,24 @@
             const item = audioQueue.shift();
             const baseChantVol = Math.max(1.2, audioSettings.chant_volume || 1.5);
 
-            // Phát giọng đọc tiếng Việt chuẩn Studio (từ file MP3 đã chuẩn hóa +10.5dB hoặc Base64)
-            const audioSrc = item.url ? item.url : ("data:audio/mp3;base64," + item.b64);
-            const mainAudio = new Audio(audioSrc);
+            // Nếu là giọng đọc AI động có tên Phật tử (externalUrl Google VI TTS), phát trực tiếp qua HTML5 Audio (không gắn createMediaElementSource để tránh bị CORS làm câm tiếng)
+            const isExternalTts = Boolean(item.externalUrl);
+            const audioSrc = item.externalUrl
+                ? item.externalUrl
+                : (item.url ? item.url : ("data:audio/mp3;base64," + item.b64));
+            const mainAudio = new Audio();
+            if (isExternalTts) {
+                mainAudio.referrerPolicy = "no-referrer";
+            }
+            mainAudio.src = audioSrc;
             currentVoiceAudio = mainAudio;
             mainAudio.volume = 1.0;
             mainAudio.preservesPitch = true;
             mainAudio.playbackRate = 1.0;
-            attachGainToAudioElement(mainAudio, baseChantVol);
+
+            if (!isExternalTts) {
+                attachGainToAudioElement(mainAudio, baseChantVol);
+            }
 
             let finished = false;
             const finishAudio = () => {
@@ -1870,9 +1900,24 @@
                 }
             };
 
+            const handleAudioError = () => {
+                if (finished) return;
+                // Nếu mạng chặn Google TTS, tự động chuyển sang phát file MP3 tiếng Việt dự phòng (nếu có)
+                if (isExternalTts && item.fallbackUrl) {
+                    finished = true;
+                    currentVoiceAudio = null;
+                    isPlayingAudio = false;
+                    audioQueue.length = 0;
+                    audioQueue.push({ url: item.fallbackUrl, isSutra: false });
+                    processAudioQueue();
+                    return;
+                }
+                finishAudio();
+            };
+
             mainAudio.onended = finishAudio;
-            mainAudio.onerror = finishAudio;
-            mainAudio.play().catch(finishAudio);
+            mainAudio.onerror = handleAudioError;
+            mainAudio.play().catch(handleAudioError);
         }
 
         function playTempleBell(volScale = 1.0) {
@@ -2438,7 +2483,71 @@
         }
 
         let incenseVoiceToggle = 0;
-        function playStudioVietnameseVoice(ttsUrl) {
+        function cleanSpeechText(str) {
+            return String(str || "")
+                .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, " ")
+                .replace(/[|=)+*_<>\[\]{}#~^`]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        function splitVietnameseTtsChunks(text, maxLen = 155) {
+            const clean = cleanSpeechText(text);
+            if (!clean) return [];
+            const rawParts = clean.split(/(?<=[.!?;,])\s+/);
+            const chunks = [];
+            let current = "";
+            for (const part of rawParts) {
+                if ((current + " " + part).trim().length <= maxLen) {
+                    current = (current + " " + part).trim();
+                } else {
+                    if (current) chunks.push(current);
+                    if (part.length <= maxLen) {
+                        current = part;
+                    } else {
+                        const words = part.split(" ");
+                        current = "";
+                        for (const w of words) {
+                            if ((current + " " + w).trim().length <= maxLen) {
+                                current = (current + " " + w).trim();
+                            } else {
+                                if (current) chunks.push(current);
+                                current = w;
+                            }
+                        }
+                    }
+                }
+            }
+            if (current) chunks.push(current);
+            return chunks;
+        }
+
+        function speakDynamicVietnameseWithName(ttsText, fallbackUrl = "") {
+            getAudioCtx();
+            startAmbientMeditationMusic();
+            const chunks = splitVietnameseTtsChunks(ttsText, 155);
+            if (chunks.length === 0) {
+                if (fallbackUrl) enqueueVoiceUrl(fallbackUrl, true);
+                return;
+            }
+            audioQueue.length = 0;
+            stopCurrentVoiceImmediate();
+            chunks.forEach((chunk, idx) => {
+                const gUrl = `https://translate.googleapis.com/translate_tts?ie=UTF-8&tl=vi&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+                audioQueue.push({
+                    externalUrl: gUrl,
+                    fallbackUrl: idx === 0 ? fallbackUrl : "",
+                    isSutra: false
+                });
+            });
+            processAudioQueue();
+        }
+
+        function playStudioVietnameseVoice(ttsUrl, ttsText = "") {
+            if (ttsText) {
+                speakDynamicVietnameseWithName(ttsText, ttsUrl || "");
+                return;
+            }
             if (!ttsUrl) return;
             getAudioCtx();
             startAmbientMeditationMusic();
@@ -2460,6 +2569,7 @@
             const actionType = payload.action_type || "chat";
             const user = (payload.user || "Phật Tử Thiện Tâm").trim();
             const text = (payload.text || "Nam Mô A Di Đà Phật 🙏").trim();
+            const cleanWish = cleanSpeechText(text) || "Cầu gia đạo bình an, vạn sự cát tường";
             const avatarType = payload.avatar_type || "female";
 
             let ev = null;
@@ -2477,7 +2587,8 @@
                     merit_added: 15,
                     highlight_btn: "incense",
                     global_stats: stats,
-                    tts_url: voiceFile
+                    tts_url: voiceFile,
+                    tts_text: `Nam Mô A Di Đà Phật. Chứng minh công đức Phật tử ${user} thành tâm đứng lên bước tới bát hương dâng hương Tam Bảo, nguyện cầu: ${cleanWish}. Nguyện mười phương Chư Phật gia hộ cho Phật tử ${user} vạn sự bình an, sở cầu như ý.`
                 };
             } else if (actionType === "sit_meditate") {
                 const stats = updateCloudGlobalStats(user, 10, 0);
@@ -2489,7 +2600,8 @@
                     merit_added: 10,
                     highlight_btn: "meditate",
                     global_stats: stats,
-                    tts_url: "static/audio/tts/meditate_1.mp3?v=loud1"
+                    tts_url: "static/audio/tts/meditate_1.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} đang tịnh tâm ngồi thiền trên bồ đoàn Chánh Điện, nhất tâm nguyện cầu: ${cleanWish}. Chúc Phật tử ${user} thân tâm thường an lạc, trí tuệ sáng suốt.`
                 };
             } else if (actionType === "change_seat") {
                 const stats = updateCloudGlobalStats(user, 5, 0);
@@ -2500,7 +2612,8 @@
                     avatar_type: avatarType,
                     highlight_btn: "move",
                     global_stats: stats,
-                    tts_url: "static/audio/tts/move_seat.mp3?v=loud1"
+                    tts_url: "static/audio/tts/move_seat.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Hoan hỷ đón Phật tử ${user} di chuyển đến vị trí bồ đoàn trang nghiêm gần tôn tượng Đức Phật.`
                 };
             } else if (actionType === "set_name") {
                 const stats = updateCloudGlobalStats(user, 10, 1);
@@ -2511,7 +2624,8 @@
                     avatar_type: avatarType,
                     highlight_btn: "name",
                     global_stats: stats,
-                    tts_url: "static/audio/tts/set_name.mp3?v=loud1"
+                    tts_url: "static/audio/tts/set_name.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Chào mừng Phật tử ${user} đã an vị trang nghiêm trên Chánh Điện với lời nguyện cầu: ${cleanWish}. Chúc Phật tử ${user} gia đạo bình an, vạn sự cát tường.`
                 };
             } else if (actionType === "ask_fortune") {
                 const fortune = CLOUD_FORTUNES[Math.floor(Math.random() * CLOUD_FORTUNES.length)];
@@ -2524,7 +2638,8 @@
                     fortune: fortune,
                     highlight_btn: "fortune",
                     global_stats: stats,
-                    tts_url: fortune.tts_url || "static/audio/tts/fortune_01.mp3?v=loud1"
+                    tts_url: fortune.tts_url || "static/audio/tts/fortune_01.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm xin quẻ xăm: ${cleanWish}. Chúc mừng Phật tử ${user} đã rút được ${fortune.id}, ${fortune.rank}, tên quẻ: ${fortune.title}. Lời bàn: ${fortune.meaning}`
                 };
             } else if (actionType === "donate_lamp") {
                 const offeringName = payload.offering_name || "ĐÈN HOA ĐĂNG LIÊN HOA";
@@ -2545,7 +2660,8 @@
                     fortune: fortune,
                     highlight_btn: "lamp",
                     global_stats: stats,
-                    tts_url: lampVoice
+                    tts_url: lampVoice,
+                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức vô lượng của Phật tử ${user} đã phát tâm ủng hộ hương đèn, dâng lễ ${offeringName} cúng dường Tam Bảo. Nguyện hồi hướng công đức lành này cho Phật tử ${user} cùng gia quyến phúc lộc viên mãn, vạn sự hanh thông.`
                 };
             } else {
                 const lower = text.toLowerCase();
@@ -2560,7 +2676,8 @@
                         pop_qr_spotlight: true,
                         highlight_btn: "lamp",
                         global_stats: stats,
-                        tts_url: "static/audio/tts/qr_guide.mp3?v=loud1"
+                        tts_url: "static/audio/tts/qr_guide.mp3?v=loud1",
+                        tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} muốn phát tâm công đức hương đèn Tam Bảo xin hoan hỷ quét mã Q R V P Bank trên màn hình, số tài khoản 6 1 4 5 7 7 8 0 8, chủ tài khoản Nguyễn Bá Vương.`
                     };
                 } else {
                     ev = {
@@ -2568,7 +2685,9 @@
                         user: user,
                         text: text,
                         avatar_type: avatarType,
-                        global_stats: stats
+                        global_stats: stats,
+                        tts_url: "static/audio/tts/incense_1.mp3?v=loud1",
+                        tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm gửi lời nguyện cầu: ${cleanWish}. Chúc Phật tử ${user} sở cầu như ý.`
                     };
                 }
             }
@@ -2694,8 +2813,16 @@
             const prof = getMyProfile();
             if (hits.length > 0) {
                 const clickedDev = hits[0].object.userData.devoteeRef;
-                if (clickedDev && clickedDev.name !== prof.name) {
-                    replyToUser(clickedDev.name);
+                if (clickedDev) {
+                    clickedDev.interactPulseUntil = performance.now() + 2600;
+                    const devWish = cleanSpeechText(clickedDev.message) || "Nam Mô A Di Đà Phật, cầu bình an cát tường";
+                    speakDynamicVietnameseWithName(
+                        `Nam Mô A Di Đà Phật. Phật tử ${clickedDev.name} đang thành tâm nguyện cầu: ${devWish}. Chúc Phật tử ${clickedDev.name} sở cầu như ý.`,
+                        "static/audio/tts/incense_1.mp3?v=loud1"
+                    );
+                    if (clickedDev.name !== prof.name) {
+                        replyToUser(clickedDev.name);
+                    }
                     return;
                 }
             }
@@ -2726,6 +2853,10 @@
                     myDev.statusHint = "Đang đổi chỗ";
                     myDev.refreshTexture();
                     flashActionBtn("move");
+                    speakDynamicVietnameseWithName(
+                        `Nam Mô A Di Đà Phật. Phật tử ${prof.name} đang di chuyển đến vị trí bồ đoàn trang nghiêm trên Chánh Điện.`,
+                        "static/audio/tts/move_seat.mp3?v=loud1"
+                    );
                 }
             }
         });
@@ -3000,8 +3131,8 @@
             if (data.highlight_btn) {
                 flashActionBtn(data.highlight_btn);
             }
-            if (data.tts_url) {
-                playStudioVietnameseVoice(data.tts_url);
+            if (data.tts_text || data.tts_url) {
+                playStudioVietnameseVoice(data.tts_url || "", data.tts_text || "");
             }
 
             if (data.global_stats) {
