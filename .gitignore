@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.pyc
+*.db
+snap*.png
+static/audio/z2m_raw.webm

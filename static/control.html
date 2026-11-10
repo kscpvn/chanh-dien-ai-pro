@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Điều Khiển - Chánh Điện AI Multi-Platform</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: #12131a; color: #e2e8f0; padding: 24px; }
+        .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: #1e202b; border: 1px solid #32364a; border-radius: 10px; padding: 18px; }
+        .card h2 { font-size: 16px; color: #ffd700; margin-bottom: 12px; border-bottom: 1px solid #32364a; padding-bottom: 8px; }
+        label { display: block; font-size: 12px; color: #94a3b8; margin: 8px 0 4px; }
+        input, select {
+            width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid #475569;
+            background: #0f1016; color: #fff; font-size: 13px;
+        }
+        .btn-row { display: flex; gap: 8px; margin-top: 12px; }
+        button {
+            padding: 8px 14px; border: none; border-radius: 6px; font-weight: bold;
+            font-size: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-primary { background: #eab308; color: #000; }
+        .btn-success { background: #10b981; color: #fff; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .status-badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .on { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .off { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .queue-item {
+            background: #14161f; border: 1px solid #2e3346; border-radius: 6px;
+            padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .full-width { grid-column: span 2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>1. Kết nối TikTok LIVE</h2>
+            <p style="font-size:12px;">Trạng thái: <span id="tt-status" class="status-badge off">Chưa kết nối</span></p>
+            <label>TikTok Username (ví dụ: @primecase18):</label>
+            <input type="text" id="tt-user" value="@primecase18">
+            <div class="btn-row">
+                <button class="btn-success" onclick="controlPlatform('tiktok', 'start')">Kết nối TikTok</button>
+                <button class="btn-danger" onclick="controlPlatform('tiktok', 'stop')">Ngắt kết nối</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>2. Kết nối Facebook LIVE (Graph API)</h2>
+            <p style="font-size:12px;">Trạng thái: <span id="fb-status" class="status-badge off">Chưa kết nối</span></p>
+            <label>Facebook Live Video ID:</label>
+            <input type="text" id="fb-vid" placeholder="Nhập Video ID đang phát Live...">
+            <label>Page / User Access Token:</label>
+            <input type="password" id="fb-token" placeholder="EAABsbCS1iHgBO...">
+            <div class="btn-row">
+                <button class="btn-success" onclick="controlPlatform('facebook', 'start')">Kết nối Facebook</button>
+                <button class="btn-danger" onclick="controlPlatform('facebook', 'stop')">Ngắt kết nối</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>3. Kết nối YouTube LIVE (Chat & Super Chat)</h2>
+            <p style="font-size:12px;">Trạng thái: <span id="yt-status" class="status-badge off">Chưa kết nối</span></p>
+            <label>YouTube Live Video ID hoặc Link Live:</label>
+            <input type="text" id="yt-vid" placeholder="Dán link hoặc ID video YouTube Live...">
+            <div class="btn-row">
+                <button class="btn-success" onclick="controlPlatform('youtube', 'start')">Kết nối YouTube</button>
+                <button class="btn-danger" onclick="controlPlatform('youtube', 'stop')">Ngắt kết nối</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>4. Giả lập 6 Nút Tương Tác Live (TikTok / FB / YouTube)</h2>
+            <label>Tên người xem:</label>
+            <input type="text" id="sim-user" value="Nguyễn Bá Vương">
+            <label>Nội dung / Cú pháp (1: Lên hương | 2: Ngồi thiền | 3: Đổi chỗ | 4: Đặt tên | 5: Xin quẻ | 6: Hương đèn):</label>
+            <input type="text" id="sim-text" value="Cầu cho dự án mới hanh thông, tài lộc viên mãn">
+            <div class="btn-row" style="flex-wrap: wrap;">
+                <button class="btn-primary" style="background:#f97316; color:#fff;" onclick="simulateActionBtn('stand_incense')">🚶 1. Đứng Lên Thắp Hương</button>
+                <button class="btn-success" onclick="simulateActionBtn('sit_meditate')">🧘 2. Ngồi Thiền Tại Chỗ</button>
+                <button class="btn-primary" style="background:#0284c7; color:#fff;" onclick="simulateActionBtn('change_seat')">🔄 3. Đổi Chỗ Gần Phật</button>
+                <button class="btn-primary" style="background:#8b5cf6; color:#fff;" onclick="simulateActionBtn('set_name')">✍️ 4. Đặt Tên</button>
+                <button class="btn-primary" onclick="simulateActionBtn('ask_fortune')">🎋 5. Xin Quẻ AI</button>
+                <button class="btn-danger" onclick="simulateActionBtn('donate_lamp')">🏮 6. Ủng Hộ Hương Đèn</button>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h2>5. Bộ Điều Khiển Tụng Chú Đại Bi (TT. Thích Trí Thoát) & Nhạc Thiền</h2>
+            <p style="font-size:12.5px; color:#94a3b8; margin-bottom:10px;">
+                Đang tích hợp mặc định bản thu <b>Tụng Chú Đại Bi 108 biến (có chữ) - Thượng Tọa Thích Trí Thoát</b> (44.1kHz Stereo 128kbps) phát liên tục và đồng bộ chữ kinh trên màn hình <b>/overlay</b>:
+            </p>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>📿 Âm lượng Tụng Chú Đại Bi (TT. Thích Trí Thoát): <b id="lbl-chant-vol" style="color:#ffd700;">150%</b></label>
+                    <input type="range" id="rng-chant-vol" min="0.2" max="2.5" step="0.1" value="1.5" oninput="updateAudioVolume()">
+                </div>
+                <div>
+                    <label>🎵 Âm lượng Nhạc Thiền Phật Giáo (MP3 Nền Nhẹ): <b id="lbl-amb-vol" style="color:#60a5fa;">25%</b></label>
+                    <input type="range" id="rng-amb-vol" min="0.0" max="1.5" step="0.05" value="0.25" oninput="updateAudioVolume()">
+                </div>
+            </div>
+            <label style="margin-top:12px; color:#ffd700; font-weight:bold;">📖 Chọn Nguồn Tiếng Kinh Phát Trên Chánh Điện:</label>
+            <div class="btn-row" style="margin-top: 6px; flex-wrap: wrap;">
+                <button class="btn-danger" style="background:#b91c1c; border: 1.5px solid #ffd700;" onclick="selectSutraMode('mp3_kinh_phat')">📿 Tụng Chú Đại Bi 108 Biến (Có Chữ) - TT. Thích Trí Thoát [MẶC ĐỊNH]</button>
+                <button class="btn-success" style="background:#059669;" onclick="selectSutraMode('mp3_tam_kinh')">🎵 Phát MP3 Tụng Bát Nhã Tâm Kinh Chùa</button>
+                <button class="btn-success" onclick="selectSutraMode('bat_nha_tam_kinh')">📜 Đọc Bát Nhã Tâm Kinh (Giọng Đọc AI)</button>
+                <button class="btn-primary" style="background:#8b5cf6; color:#fff;" onclick="selectSutraMode('kinh_duoc_su')">🪷 Đọc Chú Dược Sư Cầu An (Giọng Đọc AI)</button>
+                <button class="btn-primary" style="background:#d97706; color:#fff;" onclick="selectSutraMode('ke_dang_huong')">🔥 Đọc Kệ Dâng Hương Tam Bảo (Giọng Đọc AI)</button>
+            </div>
+            <div class="btn-row" style="margin-top: 12px; flex-wrap: wrap;">
+                <button class="btn-primary" onclick="triggerAudioAction('next_sutra')">⏭️ Chuyển Sang Đoạn Chữ Kinh Đại Bi Tiếp Theo</button>
+                <button class="btn-primary" style="background:#f59e0b; color:#000;" onclick="triggerAudioAction('ring_bell')">🔔 Điểm Chuông Chùa Êm Dịu</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>6. Quản trị Dữ liệu & Chế độ Tự Hành 24/7</h2>
+            <p style="font-size:13px; margin-bottom:6px;">
+                Chế độ duyệt bình luận: <b id="auto-mode-label" style="color:#34d399;">TỰ ĐỘNG (AUTO)</b>
+            </p>
+            <div class="btn-row">
+                <button class="btn-primary" onclick="toggleAutoApprove(true)">Bật Tự Động Duyệt</button>
+                <button class="btn-danger" onclick="toggleAutoApprove(false)">Bật Duyệt Tay</button>
+            </div>
+            <hr style="border:0; border-top:1px solid #32364a; margin:12px 0;">
+            <p style="font-size:13px; margin-bottom:6px;">
+                Tự Hành 24/7 (Autopilot lúc vắng khách): <b id="autopilot-mode-label" style="color:#34d399;">ĐANG BẬT</b>
+            </p>
+            <div class="btn-row">
+                <button class="btn-success" onclick="toggleAutopilot(true)">Bật Tự Hành 24/7</button>
+                <button class="btn-danger" onclick="toggleAutopilot(false)">Tắt Tự Hành</button>
+            </div>
+            <hr style="border:0; border-top:1px solid #32364a; margin:12px 0;">
+            <button class="btn-danger" onclick="resetDB()">🗑️ Xóa & Đặt lại Bảng Xếp Hạng SQLite</button>
+        </div>
+
+        <div class="card full-width">
+            <h2>6. Thử Nghiệm Góc Zoom 3D (Sức Chứa 1.000 Chỗ Ngồi)</h2>
+            <p style="font-size:12.5px; color:#94a3b8; margin-bottom:10px;">
+                Bấm vào các nút dưới đây để kiểm tra camera 3D tự động mở rộng góc nhìn từ cận cảnh đến đại cảnh 1.000 tòa sen:
+            </p>
+            <div class="btn-row">
+                <button class="btn-primary" onclick="testCameraZoom(8)">🎥 Cận Cảnh (8 Chỗ)</button>
+                <button class="btn-success" onclick="testCameraZoom(60)">🎥 Trung Cảnh (60 Chỗ)</button>
+                <button class="btn-primary" style="background:#8b5cf6; color:#fff;" onclick="testCameraZoom(350)">🎥 Toàn Cảnh (350 Chỗ)</button>
+                <button class="btn-danger" style="background:#ec4899;" onclick="testCameraZoom(1000)">🎥 Đại Cảnh 1.000 Tòa Sen Vĩ Đại</button>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h2>7. Cấu hình QR VPBank & Vinh Danh Phật Tử Cúng Dường Hương Đèn Trên Live</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                <div>
+                    <label>Mã Ngân Hàng (Mặc định: VPBank):</label>
+                    <input type="text" id="don-bank" value="VPBank">
+                </div>
+                <div>
+                    <label>Số Tài Khoản Nhận Công Đức:</label>
+                    <input type="text" id="don-acc" value="614577808">
+                </div>
+                <div>
+                    <label>Tên Chủ Tài Khoản (Không dấu):</label>
+                    <input type="text" id="don-name" value="NGUYEN BA VUONG">
+                </div>
+            </div>
+            <div class="btn-row" style="margin-top: 10px;">
+                <button class="btn-success" onclick="saveDonationConfig(true)">🏮 Lưu & Hiện Luôn QR VPBank Nổi Góc Phải Màn Hình Live</button>
+                <button class="btn-primary" onclick="saveDonationConfig(false)">💾 Ẩn QR Góc Phải (Chỉ hiện khi bấm nút Hương Đèn)</button>
+            </div>
+
+            <div style="margin-top:14px; padding-top:12px; border-top:1px dashed #475569;">
+                <label style="color:#ffd700; font-size:13px;">🔔 Vinh Danh Nhanh Khi Có Phật Tử Chuyển Khoản Vào VPBank 614577808 (Hoặc Tự Động Qua Webhook <code>/api/bank_webhook</code>):</label>
+                <div style="display:grid; grid-template-columns: 1.2fr 0.8fr 1.5fr auto; gap: 10px; margin-top: 6px; align-items: end;">
+                    <div>
+                        <label>Tên Phật Tử Cúng Dường:</label>
+                        <input type="text" id="bank-donor-name" value="Phật Tử Diệu Tâm" placeholder="Tên người chuyển khoản...">
+                    </div>
+                    <div>
+                        <label>Số tiền (VNĐ):</label>
+                        <input type="number" id="bank-donor-amount" value="50000" step="10000">
+                    </div>
+                    <div>
+                        <label>Lời nguyện cầu / Nội dung CK:</label>
+                        <input type="text" id="bank-donor-wish" value="Cúng dường hương đèn Tam Bảo, cầu gia đạo bình an">
+                    </div>
+                    <button class="btn-gold" onclick="triggerBankDonationHonor()" style="height:38px; white-space:nowrap;">
+                        🏮 Vinh Danh & Đọc Cảm Tạ Trên Live
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h2>8. Hàng đợi Phê duyệt Thủ công (Human-in-the-Loop Queue)</h2>
+            <div id="pending-list"><p style="font-size:13px; color:#64748b;">Không có bình luận nào đang chờ duyệt.</p></div>
+        </div>
+    </div>
+
+    <script>
+        const CLOUD_SYNC_TOPIC = "chanh_dien_ai_pro_vuong_614577808";
+        const localBroadcast = (typeof BroadcastChannel !== "undefined") ? new BroadcastChannel("chanh_dien_sync") : null;
+        let wsControlLocalConnected = false;
+
+        function pushCloudSyncEvent(eventObj) {
+            eventObj._sender = "control_panel";
+            if (localBroadcast) {
+                try { localBroadcast.postMessage(eventObj); } catch (e) {}
+            }
+            fetch(`https://ntfy.sh/${CLOUD_SYNC_TOPIC}`, {
+                method: "POST",
+                body: JSON.stringify(eventObj)
+            }).catch(() => {});
+        }
+
+        function connectControlWS() {
+            if (location.hostname.endsWith("github.io")) return;
+            try {
+                const wsProtocol = location.protocol === "https:" ? "wss:" : "ws:";
+                const ws = new WebSocket(`${wsProtocol}//${location.host}/ws/control`);
+                ws.onopen = () => { wsControlLocalConnected = true; };
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.type === "CONTROL_STATE") {
+                        const p = data.platforms;
+                        const ttBadge = document.getElementById("tt-status");
+                        ttBadge.className = "status-badge " + (p.tiktok_connected ? "on" : "off");
+                        ttBadge.innerText = p.tiktok_connected ? `Đang kết nối (${p.tiktok_username})` : "Chưa kết nối";
+
+                        const fbBadge = document.getElementById("fb-status");
+                        fbBadge.className = "status-badge " + (p.fb_connected ? "on" : "off");
+                        fbBadge.innerText = p.fb_connected ? `Đang kết nối (${p.fb_video_id})` : "Chưa kết nối";
+
+                        const ytBadge = document.getElementById("yt-status");
+                        ytBadge.className = "status-badge " + (p.yt_connected ? "on" : "off");
+                        ytBadge.innerText = p.yt_connected ? `Đang kết nối (${p.yt_video_id})` : "Chưa kết nối";
+
+                        const modeLbl = document.getElementById("auto-mode-label");
+                        modeLbl.innerText = data.auto_approve ? "TỰ ĐỘNG (AUTO)" : "DUYỆT TAY (HUMAN-IN-THE-LOOP)";
+                        modeLbl.style.color = data.auto_approve ? "#34d399" : "#fbbf24";
+
+                        const apLbl = document.getElementById("autopilot-mode-label");
+                        if (apLbl && data.autopilot_enabled !== undefined) {
+                            apLbl.innerText = data.autopilot_enabled ? "ĐANG BẬT" : "ĐÃ TẮT";
+                            apLbl.style.color = data.autopilot_enabled ? "#34d399" : "#ef4444";
+                        }
+
+                        const qDiv = document.getElementById("pending-list");
+                        if (!data.pending_queue || data.pending_queue.length === 0) {
+                            qDiv.innerHTML = `<p style="font-size:13px; color:#64748b;">Không có bình luận nào đang chờ duyệt.</p>`;
+                        } else {
+                            qDiv.innerHTML = data.pending_queue.map(item => `
+                                <div class="queue-item">
+                                    <div>
+                                        <span style="color:#ffd700; font-weight:bold;">[${item.platform.toUpperCase()}] ${item.user}:</span>
+                                        <span>${item.text}</span>
+                                    </div>
+                                    <div style="display:flex; gap:6px;">
+                                        <button class="btn-success" onclick="moderateItem('approve', '${item.id}')">✓ Duyệt lên Live</button>
+                                        <button class="btn-danger" onclick="moderateItem('reject', '${item.id}')">✕ Từ chối</button>
+                                    </div>
+                                </div>
+                            `).join("");
+                        }
+                    }
+                };
+                ws.onclose = () => {
+                    wsControlLocalConnected = false;
+                    setTimeout(connectControlWS, 4000);
+                };
+            } catch (e) {}
+        }
+        connectControlWS();
+
+        async function controlPlatform(platform, action) {
+            await fetch("/api/platform", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    platform, action,
+                    tiktok_username: document.getElementById("tt-user").value,
+                    fb_video_id: document.getElementById("fb-vid").value,
+                    fb_access_token: document.getElementById("fb-token").value,
+                    yt_video_id: document.getElementById("yt-vid").value
+                })
+            }).catch(() => {});
+        }
+
+        async function simulate(eventType) {
+            await fetch("/api/simulate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    platform: "tiktok",
+                    event_type: eventType,
+                    user: document.getElementById("sim-user").value,
+                    text: document.getElementById("sim-text").value,
+                    gift_name: "ROSE",
+                    diamonds: 1
+                })
+            }).catch(() => {});
+        }
+
+        async function toggleAutoApprove(val) {
+            await fetch("/api/moderation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "toggle_auto", auto_approve: val })
+            }).catch(() => {});
+        }
+
+        async function toggleAutopilot(val) {
+            await fetch("/api/autopilot", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enabled: val })
+            }).catch(() => {});
+        }
+
+        async function updateAudioVolume() {
+            const chantVol = parseFloat(document.getElementById("rng-chant-vol").value);
+            const ambVol = parseFloat(document.getElementById("rng-amb-vol").value);
+
+            document.getElementById("lbl-chant-vol").innerText = Math.round(chantVol * 100) + "%";
+            document.getElementById("lbl-amb-vol").innerText = Math.round(ambVol * 100) + "%";
+
+            pushCloudSyncEvent({
+                type: "AUDIO_SETTINGS",
+                audio_settings: {
+                    chant_volume: chantVol,
+                    ambient_volume: ambVol
+                }
+            });
+
+            await fetch("/api/audio_control", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "update_volume",
+                    chant_volume: chantVol,
+                    wooden_fish_volume: 0.0,
+                    ambient_volume: ambVol,
+                    auto_wooden_fish: false
+                })
+            }).catch(() => {});
+        }
+
+        async function triggerAudioAction(action) {
+            if (action === "ring_bell") {
+                pushCloudSyncEvent({ type: "RING_TEMPLE_BELL" });
+            }
+            await fetch("/api/audio_control", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action, knocks: 10 })
+            }).catch(() => {});
+        }
+
+        async function selectSutraMode(mode) {
+            pushCloudSyncEvent({
+                type: "AUDIO_SETTINGS",
+                audio_settings: { sutra_mode: mode }
+            });
+            await fetch("/api/audio_control", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "select_sutra", sutra_mode: mode })
+            }).catch(() => {});
+        }
+
+        async function testCameraZoom(count) {
+            pushCloudSyncEvent({ type: "SET_DEVOTEES_COUNT", count: count });
+            await fetch("/api/test_camera_zoom", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ count })
+            }).catch(() => {});
+        }
+
+        async function moderateItem(action, itemId) {
+            await fetch("/api/moderation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action, item_id: itemId })
+            }).catch(() => {});
+        }
+
+        async function simulateActionBtn(actionType) {
+            const user = document.getElementById("sim-user").value.trim() || "Nguyễn Bá Vương";
+            const text = document.getElementById("sim-text").value.trim() || "Cầu bình an tài lộc viên mãn";
+
+            const mapEvent = {
+                stand_incense: { type: "STAND_INCENSE", user, text, avatar_type: "high_monk", merit_added: 15, highlight_btn: "incense", tts_text: `Phật tử ${user} thành tâm dâng hương: ${text}` },
+                sit_meditate:  { type: "SIT_MEDITATE", user, text, avatar_type: "high_monk", merit_added: 10, highlight_btn: "meditate" },
+                change_seat:   { type: "CHANGE_SEAT", user, text: "Đang đổi chỗ gần Phật", avatar_type: "high_monk", highlight_btn: "move" },
+                set_name:      { type: "AVATAR_CHANGE", user, text, avatar_type: "high_monk", highlight_btn: "name", tts_text: `Hoan hỷ chào đón Phật tử ${user} an vị tại Chánh Điện.` },
+                ask_fortune:   {
+                    type: "FORTUNE", user, text, avatar_type: "high_monk", highlight_btn: "fortune",
+                    fortune: {
+                        id: "Quẻ Số 01",
+                        rank: "THƯỢNG THƯỢNG CÁT",
+                        title: "Long Môn Vũ Hóa (Cá Chép Hóa Rồng)",
+                        poem: "Phong vân hội tụ đất trời mở,\nCá vượt Vũ Môn hóa Rồng vàng.\nCông danh tài lộc đều rực rỡ,\nGia đạo bình an hưởng giàu sang.",
+                        meaning: "Đại cát đại lợi. Mọi dự định công danh, đầu tư, thi cử hay cầu tài lộc đều gặp vận hội lớn."
+                    },
+                    tts_text: `Thí chủ ${user} rút được Quẻ Số 01 Thượng Thượng Cát, Long Môn Vũ Hóa.`
+                },
+                donate_lamp:   {
+                    type: "GIFT", user, gift_name: "ĐÈN HOA ĐĂNG LIÊN HOA", merit_added: 100, pop_qr_spotlight: true, highlight_btn: "lamp",
+                    tts_text: `Nam Mô A Di Đà Phật. Xin thành tâm tán thán công đức Phật tử ${user} đã dâng Đèn Hoa Đăng Liên Hoa cúng dường Tam Bảo.`
+                }
+            };
+            if (mapEvent[actionType]) {
+                pushCloudSyncEvent(mapEvent[actionType]);
+            }
+
+            await fetch("/api/viewer_action", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action_type: actionType,
+                    user: user,
+                    text: text,
+                    avatar_type: "high_monk",
+                    offering_name: "ĐÈN HOA ĐĂNG LIÊN HOA",
+                    diamonds: 5
+                })
+            }).catch(() => {});
+        }
+
+        async function saveDonationConfig(showBadge) {
+            const bankId = document.getElementById("don-bank").value.trim() || "VPBank";
+            const accNo = document.getElementById("don-acc").value.trim() || "614577808";
+            const accName = document.getElementById("don-name").value.trim() || "NGUYEN BA VUONG";
+            const cfg = {
+                bank_id: bankId,
+                account_no: accNo,
+                account_name: accName,
+                note_prefix: "CONG DUC HUONG DEN",
+                show_qr_badge: showBadge
+            };
+            pushCloudSyncEvent({ type: "DONATION_CONFIG", donation_config: cfg });
+            await fetch("/api/donation_config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(cfg)
+            }).catch(() => {});
+        }
+
+        async function triggerBankDonationHonor() {
+            const donorName = document.getElementById("bank-donor-name").value.trim() || "Đại Thí Chủ Công Đức";
+            const amountVnd = parseInt(document.getElementById("bank-donor-amount").value || "50000", 10);
+            const wish = document.getElementById("bank-donor-wish").value.trim() || "Cúng dường hương đèn Tam Bảo, cầu gia đạo bình an";
+            const meritAdded = Math.max(50, Math.floor(amountVnd / 500));
+
+            pushCloudSyncEvent({
+                type: "GIFT",
+                user: donorName,
+                gift_name: `CÚNG DƯỜNG HƯƠNG ĐÈN (${amountVnd.toLocaleString('vi-VN')}đ)`,
+                merit_added: meritAdded,
+                pop_qr_spotlight: true,
+                highlight_btn: "lamp",
+                fortune: {
+                    id: "Quẻ Công Đức",
+                    rank: "ĐẠI CÁT ĐẠI LỢI",
+                    title: "Phước Báu Vô Lượng - Vạn Sự Cát Tường",
+                    poem: "Một nén tâm hương thấu cửu trùng,\nĐèn sen tỏa sáng khắp hư không.\nCông đức vô lượng gia đường thịnh,\nPhước lộc綿 trường vạn sự thông.",
+                    meaning: `Cảm tạ tấm lòng vàng của thí chủ ${donorName}: ${wish}`
+                },
+                tts_text: `Nam Mô A Di Đà Phật! Đại Hùng Bảo Điện xin thành kính vinh danh và cảm tạ tấm lòng vàng của Phật tử ${donorName} đã phát tâm cúng dường hương đèn ${amountVnd.toLocaleString('vi-VN')} đồng qua tài khoản VPBank 6 1 4 5 7 7 8 0 8 với lời nguyện: ${wish}. Kính chúc thí chủ gia đạo bình an, vạn sự cát tường như ý!`
+            });
+
+            await fetch("/api/bank_webhook", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    donor_name: donorName,
+                    amount_vnd: amountVnd,
+                    wish: wish
+                })
+            }).catch(() => {});
+        }
+
+        async function resetDB() {
+            if (confirm("Bạn có chắc chắn muốn xóa toàn bộ điểm Công Đức và Bảng xếp hạng?")) {
+                await fetch("/api/moderation", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "reset_db" })
+                }).catch(() => {});
+            }
+        }
+    </script>
+</body>
+</html>
