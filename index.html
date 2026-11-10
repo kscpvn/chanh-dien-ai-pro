@@ -1704,13 +1704,15 @@
                 bgMusicPlayer = new Audio("static/audio/nhac_thien.mp3?v=2");
                 bgMusicPlayer.loop = true;
             }
-            // Khi đang phát giọng tụng Chú Đại Bi của TT. Thích Trí Thoát, hạ nhỏ nhạc nền để tiếng tụng kinh trong trẻo 100%
+            // Khi đang phát giọng đọc (Thắp Hương / Xin Quẻ / Hương Đèn), tự động hạ nhỏ nhạc nền & tiếng tụng kinh (Auto-Ducking) xuống 4-5% để giọng đọc to, rõ 100%
             const rawAmb = audioSettings.ambient_volume !== undefined ? audioSettings.ambient_volume : 0.25;
-            const ambVol = isMp3ChantMode
-                ? Math.min(0.25, Math.max(0.0, rawAmb * 0.22))
-                : Math.min(1.0, Math.max(0.05, rawAmb * (isPlayingAudio ? 0.45 : 0.75)));
+            const ambVol = isPlayingAudio
+                ? 0.02
+                : (isMp3ChantMode
+                    ? Math.min(0.25, Math.max(0.0, rawAmb * 0.22))
+                    : Math.min(1.0, Math.max(0.05, rawAmb * 0.75)));
             bgMusicPlayer.volume = ambVol;
-            if (ambVol > 0.01) {
+            if (ambVol > 0.005) {
                 if (bgMusicPlayer.paused) bgMusicPlayer.play().catch(() => {});
             } else {
                 if (!bgMusicPlayer.paused) bgMusicPlayer.pause();
@@ -1729,7 +1731,8 @@
                     bgSutraMp3Player.loop = true;
                 }
                 const baseChant = Math.min(1.0, Math.max(0.15, (audioSettings.chant_volume || 1.5) * 0.65));
-                bgSutraMp3Player.volume = isPlayingAudio ? Math.min(0.32, baseChant * 0.35) : baseChant;
+                // Auto-Ducking mạnh mẽ: hạ tiếng tụng kinh nền xuống 0.05 (5%) khi có giọng đọc lời khấn/quẻ xăm
+                bgSutraMp3Player.volume = isPlayingAudio ? 0.05 : baseChant;
                 if (bgSutraMp3Player.paused) {
                     bgSutraMp3Player.play().then(() => {
                         const btn = document.getElementById("audio-unlock-btn");
@@ -1759,10 +1762,39 @@
         const audioQueue = [];
         let isPlayingAudio = false;
 
-        function enqueueAudio(base64Str) {
+        function stopCurrentVoiceImmediate() {
+            if (currentVoiceAudio) {
+                try {
+                    currentVoiceAudio.onended = null;
+                    currentVoiceAudio.onerror = null;
+                    currentVoiceAudio.pause();
+                } catch (e) {}
+                currentVoiceAudio = null;
+            }
+            isPlayingAudio = false;
+        }
+
+        function enqueueAudio(base64Str, immediate = true) {
             if (!base64Str) return;
-            if (audioQueue.length >= 10) audioQueue.shift();
+            if (immediate) {
+                audioQueue.length = 0;
+                stopCurrentVoiceImmediate();
+            } else if (audioQueue.length >= 10) {
+                audioQueue.shift();
+            }
             audioQueue.push({ b64: base64Str, isSutra: false });
+            processAudioQueue();
+        }
+
+        function enqueueVoiceUrl(mp3Url, immediate = true) {
+            if (!mp3Url) return;
+            if (immediate) {
+                audioQueue.length = 0;
+                stopCurrentVoiceImmediate();
+            } else if (audioQueue.length >= 10) {
+                audioQueue.shift();
+            }
+            audioQueue.push({ url: mp3Url, isSutra: false });
             processAudioQueue();
         }
 
@@ -1779,10 +1811,18 @@
             try {
                 const ctx = getAudioCtx();
                 const source = ctx.createMediaElementSource(audioEl);
+                const clarityFilter = ctx.createBiquadFilter();
+                clarityFilter.type = "peaking";
+                clarityFilter.frequency.setValueAtTime(2600, ctx.currentTime);
+                clarityFilter.Q.setValueAtTime(1.2, ctx.currentTime);
+                clarityFilter.gain.setValueAtTime(3.5, ctx.currentTime);
+
                 const voiceGain = ctx.createGain();
-                voiceGain.gain.setValueAtTime(Math.max(0.2, gainValue), ctx.currentTime);
-                source.connect(voiceGain);
-                voiceGain.connect(masterCompressor);
+                // Khuếch đại trực tiếp 2.5x - 3.0x ra loa chính (không qua bộ nén để giữ nguyên âm lượng to rõ)
+                voiceGain.gain.setValueAtTime(Math.max(1.8, gainValue * 1.75), ctx.currentTime);
+                source.connect(clarityFilter);
+                clarityFilter.connect(voiceGain);
+                voiceGain.connect(ctx.destination);
             } catch (e) {}
         }
 
@@ -1792,14 +1832,15 @@
             syncMp3Players();
 
             const item = audioQueue.shift();
-            const baseChantVol = Math.max(0.2, audioSettings.chant_volume || 1.5);
+            const baseChantVol = Math.max(1.2, audioSettings.chant_volume || 1.5);
 
-            // Phát 1 giọng đọc duy nhất, chuẩn âm sắc, trong trẻo trên nền Nhạc Thiền MP3 thật
-            const mainAudio = new Audio("data:audio/mp3;base64," + item.b64);
+            // Phát giọng đọc tiếng Việt chuẩn Studio (từ file MP3 đã chuẩn hóa +10.5dB hoặc Base64)
+            const audioSrc = item.url ? item.url : ("data:audio/mp3;base64," + item.b64);
+            const mainAudio = new Audio(audioSrc);
             currentVoiceAudio = mainAudio;
             mainAudio.volume = 1.0;
             mainAudio.preservesPitch = true;
-            mainAudio.playbackRate = 0.96;
+            mainAudio.playbackRate = 1.0;
             attachGainToAudioElement(mainAudio, baseChantVol);
 
             let finished = false;
@@ -2296,6 +2337,7 @@
         const CLOUD_FORTUNES = [
             {
                 id: "Quẻ Số 01",
+                tts_url: "static/audio/tts/fortune_01.mp3?v=loud1",
                 rank: "THƯỢNG THƯỢNG CÁT",
                 title: "Long Môn Vũ Hóa (Cá Chép Hóa Rồng)",
                 poem: "Phong vân hội tụ đất trời mở,\nCá vượt Vũ Môn hóa Rồng vàng.\nCông danh tài lộc đều rực rỡ,\nGia đạo bình an hưởng giàu sang.",
@@ -2303,6 +2345,7 @@
             },
             {
                 id: "Quẻ Số 02",
+                tts_url: "static/audio/tts/fortune_02.mp3?v=loud1",
                 rank: "THƯỢNG CÁT",
                 title: "Phượng Hoàng Lai Nghi (Phượng Hoàng Báo Điềm Lành)",
                 poem: "Đầu cành ngô đồng Phượng Hoàng đậu,\nTiếng hót vang lừng báo xuân sang.\nPhúc đức tổ tiên dày che chở,\nVạn sự hanh thông ngập ánh vàng.",
@@ -2310,6 +2353,7 @@
             },
             {
                 id: "Quẻ Số 08",
+                tts_url: "static/audio/tts/fortune_08.mp3?v=loud1",
                 rank: "THƯỢNG THƯỢNG CÁT",
                 title: "Kim Liên Khai Nở (Sen Vàng Tỏa Ngát)",
                 poem: "Hương sen thanh khiết tỏa mười phương,\nÁnh Phật từ bi chiếu dặm trường.\nTâm thành khấn nguyện đều ứng nghiệm,\nPhước lộc thọ toàn vẹn bốn phương.",
@@ -2317,6 +2361,7 @@
             },
             {
                 id: "Quẻ Số 09",
+                tts_url: "static/audio/tts/fortune_09.mp3?v=loud1",
                 rank: "THƯỢNG CÁT",
                 title: "Thuyền Thuận Gió Đông (Vạn Sự Hanh Thông)",
                 poem: "Buồm căng gió thuận vượt trùng khơi,\nBến đỗ vinh hoa rạng đất trời.\nKiên tâm bền chí ắt thành tựu,\nTài lộc tự nhiên đến tận nơi.",
@@ -2324,6 +2369,7 @@
             },
             {
                 id: "Quẻ Số 18",
+                tts_url: "static/audio/tts/fortune_18.mp3?v=loud1",
                 rank: "THƯỢNG THƯỢNG CÁT",
                 title: "Nhật Xuất Đông Hải (Mặt Trời Mọc Biển Đông)",
                 poem: "Vừng đông rực sáng chiếu muôn nơi,\nMây mù tan biến rạng chân trời.\nPhước lộc song toàn tâm an lạc,\nDanh thành lợi toại rạng rỡ đời.",
@@ -2391,21 +2437,12 @@
             return st;
         }
 
-        function speakCloudTTS(text) {
-            if (!text || !ambientAudioStarted) return;
-            try {
-                if ("speechSynthesis" in window) {
-                    window.speechSynthesis.cancel();
-                    const utter = new SpeechSynthesisUtterance(text);
-                    utter.lang = "vi-VN";
-                    utter.rate = 0.96;
-                    utter.pitch = 1.0;
-                    const voices = window.speechSynthesis.getVoices() || [];
-                    const viVoice = voices.find(v => v.lang && v.lang.toLowerCase().includes("vi"));
-                    if (viVoice) utter.voice = viVoice;
-                    window.speechSynthesis.speak(utter);
-                }
-            } catch (e) {}
+        let incenseVoiceToggle = 0;
+        function playStudioVietnameseVoice(ttsUrl) {
+            if (!ttsUrl) return;
+            getAudioCtx();
+            startAmbientMeditationMusic();
+            enqueueVoiceUrl(ttsUrl, true);
         }
 
         function broadcastCloudEvent(eventObj) {
@@ -2428,6 +2465,10 @@
             let ev = null;
             if (actionType === "stand_incense") {
                 const stats = updateCloudGlobalStats(user, 15, 1);
+                incenseVoiceToggle = (incenseVoiceToggle + 1) % 2;
+                const voiceFile = incenseVoiceToggle === 0
+                    ? "static/audio/tts/incense_1.mp3?v=loud1"
+                    : "static/audio/tts/incense_2.mp3?v=loud1";
                 ev = {
                     type: "STAND_INCENSE",
                     user: user,
@@ -2436,7 +2477,7 @@
                     merit_added: 15,
                     highlight_btn: "incense",
                     global_stats: stats,
-                    tts_text: `Phật tử ${user} thành tâm tiến lên thảm đỏ dâng hương Tam Bảo: ${text}`
+                    tts_url: voiceFile
                 };
             } else if (actionType === "sit_meditate") {
                 const stats = updateCloudGlobalStats(user, 10, 0);
@@ -2447,7 +2488,8 @@
                     avatar_type: avatarType,
                     merit_added: 10,
                     highlight_btn: "meditate",
-                    global_stats: stats
+                    global_stats: stats,
+                    tts_url: "static/audio/tts/meditate_1.mp3?v=loud1"
                 };
             } else if (actionType === "change_seat") {
                 const stats = updateCloudGlobalStats(user, 5, 0);
@@ -2457,7 +2499,8 @@
                     text: text || "Đang đổi chỗ",
                     avatar_type: avatarType,
                     highlight_btn: "move",
-                    global_stats: stats
+                    global_stats: stats,
+                    tts_url: "static/audio/tts/move_seat.mp3?v=loud1"
                 };
             } else if (actionType === "set_name") {
                 const stats = updateCloudGlobalStats(user, 10, 1);
@@ -2468,7 +2511,7 @@
                     avatar_type: avatarType,
                     highlight_btn: "name",
                     global_stats: stats,
-                    tts_text: `Hoan hỷ chào đón Phật tử ${user} đã an vị tại Đại Hùng Bảo Điện.`
+                    tts_url: "static/audio/tts/set_name.mp3?v=loud1"
                 };
             } else if (actionType === "ask_fortune") {
                 const fortune = CLOUD_FORTUNES[Math.floor(Math.random() * CLOUD_FORTUNES.length)];
@@ -2481,7 +2524,7 @@
                     fortune: fortune,
                     highlight_btn: "fortune",
                     global_stats: stats,
-                    tts_text: `Thí chủ ${user} rút được ${fortune.id}, ${fortune.rank}, ${fortune.title}. ${fortune.meaning}`
+                    tts_url: fortune.tts_url || "static/audio/tts/fortune_01.mp3?v=loud1"
                 };
             } else if (actionType === "donate_lamp") {
                 const offeringName = payload.offering_name || "ĐÈN HOA ĐĂNG LIÊN HOA";
@@ -2489,6 +2532,10 @@
                 const meritAdded = diamonds * 20;
                 const stats = updateCloudGlobalStats(user, meritAdded, 3);
                 const fortune = CLOUD_FORTUNES[0];
+                let lampVoice = "static/audio/tts/lamp_1.mp3?v=loud1";
+                if (offeringName.includes("DẦU")) lampVoice = "static/audio/tts/lamp_2.mp3?v=loud1";
+                else if (offeringName.includes("SEN VÀNG")) lampVoice = "static/audio/tts/lamp_3.mp3?v=loud1";
+                else if (offeringName.includes("HỒNG CHUNG")) lampVoice = "static/audio/tts/lamp_4.mp3?v=loud1";
                 ev = {
                     type: "GIFT",
                     user: user,
@@ -2498,7 +2545,7 @@
                     fortune: fortune,
                     highlight_btn: "lamp",
                     global_stats: stats,
-                    tts_text: `Nam Mô A Di Đà Phật. Xin thành tâm tán thán công đức Phật tử ${user} đã dâng ${offeringName} cúng dường Tam Bảo. Nguyện cầu gia đạo bình an, phước lộc viên mãn.`
+                    tts_url: lampVoice
                 };
             } else {
                 const lower = text.toLowerCase();
@@ -2508,12 +2555,12 @@
                     ev = {
                         type: "GIFT",
                         user: user,
-                        gift_name: "THỉnh MÃ QR HƯƠNG ĐÈN TAM BẢO",
+                        gift_name: "THỈNH MÃ QR HƯƠNG ĐÈN TAM BẢO",
                         merit_added: 20,
                         pop_qr_spotlight: true,
                         highlight_btn: "lamp",
                         global_stats: stats,
-                        tts_text: `Phật tử ${user} có thể quét mã QR VPBank 6 1 4 5 7 7 8 0 8 Nguyễn Bá Vương hiển thị trên màn hình để cúng dường hương đèn Tam Bảo.`
+                        tts_url: "static/audio/tts/qr_guide.mp3?v=loud1"
                     };
                 } else {
                     ev = {
@@ -2528,7 +2575,6 @@
 
             if (ev) {
                 handleLiveEvent(ev);
-                if (ev.tts_text) speakCloudTTS(ev.tts_text);
                 broadcastCloudEvent(ev);
             }
         }
@@ -2719,7 +2765,6 @@
                             const payload = JSON.parse(wrapper.message);
                             if (payload && payload._sender !== CLIENT_SESSION_ID) {
                                 handleLiveEvent(payload);
-                                if (payload.tts_text) speakCloudTTS(payload.tts_text);
                             }
                         }
                     } catch (err) {}
@@ -2734,7 +2779,6 @@
                 const payload = ev.data;
                 if (payload && payload._sender !== CLIENT_SESSION_ID) {
                     handleLiveEvent(payload);
-                    if (payload.tts_text) speakCloudTTS(payload.tts_text);
                 }
             };
         }
@@ -2955,6 +2999,9 @@
             }
             if (data.highlight_btn) {
                 flashActionBtn(data.highlight_btn);
+            }
+            if (data.tts_url) {
+                playStudioVietnameseVoice(data.tts_url);
             }
 
             if (data.global_stats) {

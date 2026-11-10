@@ -240,7 +240,22 @@ async def _synth_google_tts_b64(text: str) -> str:
                 logger.warning(f"TTS chunk status {resp.status_code}")
     if not audio_parts:
         return ""
-    b64 = base64.b64encode(b"".join(audio_parts)).decode("utf-8")
+    raw_mp3 = b"".join(audio_parts)
+    try:
+        import shutil, subprocess
+        ffmpeg_bin = shutil.which("ffmpeg")
+        if ffmpeg_bin:
+            proc = subprocess.run([
+                ffmpeg_bin, "-hide_banner", "-loglevel", "error",
+                "-i", "pipe:0",
+                "-af", "equalizer=f=220:width_type=o:width=1.5:g=3,equalizer=f=2800:width_type=o:width=1.8:g=4,volume=3.4,alimiter=limit=0.96",
+                "-ar", "44100", "-ac", "2", "-b:a", "128k", "-f", "mp3", "pipe:1"
+            ], input=raw_mp3, capture_output=True, timeout=8)
+            if proc.returncode == 0 and proc.stdout:
+                raw_mp3 = proc.stdout
+    except Exception:
+        pass
+    b64 = base64.b64encode(raw_mp3).decode("utf-8")
     if len(TTS_CACHE) < 120:
         TTS_CACHE[text] = b64
     return b64
