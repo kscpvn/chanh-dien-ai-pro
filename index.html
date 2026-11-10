@@ -1906,6 +1906,61 @@
         let bgMusicPlayer = null;
         let bgSutraMp3Player = null;
         let currentVoiceAudio = null;
+        let voiceDuckHoldUntil = 0;
+        let chantFadeInterval = null;
+
+        const IS_MOBILE_DEVICE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "") ||
+            (navigator.maxTouchPoints > 1 && window.innerWidth < 920);
+
+        // Pool 2 kênh HTML5 Audio cố định đã mở khóa (Pre-Unlocked) cho Mobile (iOS Safari / Android Chrome)
+        // Giúp phát nối tiếp nhiều câu dài mượt mà 100%, nạp trước (Preload) câu tiếp theo và không bao giờ bị ngắt giữa chừng trên điện thoại
+        const SILENT_WAV_DATA_URI = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+        const voicePlayerPool = [new Audio(), new Audio()];
+        const voicePoolUnlocked = [false, false];
+        let activePoolIdx = 0;
+        voicePlayerPool.forEach((p) => {
+            p.preload = "auto";
+            p.referrerPolicy = "no-referrer";
+            p.playsInline = true;
+            p.setAttribute("playsinline", "true");
+            p.setAttribute("webkit-playsinline", "true");
+        });
+
+        function unlockMobileVoicePlayers() {
+            voicePlayerPool.forEach((p, idx) => {
+                if (voicePoolUnlocked[idx]) return;
+                if (p === currentVoiceAudio && isPlayingAudio) {
+                    voicePoolUnlocked[idx] = true;
+                    return;
+                }
+                try {
+                    p.src = SILENT_WAV_DATA_URI;
+                    p.volume = 0.01;
+                    const pr = p.play();
+                    if (pr && typeof pr.then === "function") {
+                        pr.then(() => {
+                            p.pause();
+                            p.currentTime = 0;
+                            p.volume = 1.0;
+                            voicePoolUnlocked[idx] = true;
+                        }).catch(() => {});
+                    }
+                } catch (e) {}
+            });
+        }
+
+        function isVoiceDuckingActive() {
+            return Boolean(isPlayingAudio || audioQueue.length > 0 || Date.now() < voiceDuckHoldUntil);
+        }
+
+        function triggerImmediateDuck(holdMs = 2800) {
+            if (chantFadeInterval) {
+                clearInterval(chantFadeInterval);
+                chantFadeInterval = null;
+            }
+            voiceDuckHoldUntil = Math.max(voiceDuckHoldUntil, Date.now() + holdMs);
+            syncMp3Players();
+        }
 
         let audioSettings = {
             chant_volume: 1.5,         // Âm lượng Tiếng Tụng Kinh TT. Thích Trí Thoát (150%)
@@ -1936,20 +1991,23 @@
             if (!ambientAudioStarted) return;
             const mode = audioSettings.sutra_mode || "mp3_kinh_phat";
             const isMp3ChantMode = (mode === "mp3_kinh_phat" || mode === "chu_dai_bi" || mode === "mp3_tam_kinh");
+            const ducking = isVoiceDuckingActive();
 
             if (!bgMusicPlayer) {
                 bgMusicPlayer = new Audio("static/audio/nhac_thien.mp3?v=2");
                 bgMusicPlayer.loop = true;
+                bgMusicPlayer.playsInline = true;
+                bgMusicPlayer.setAttribute("playsinline", "true");
             }
-            // Khi đang phát giọng đọc (Thắp Hương / Xin Quẻ / Hương Đèn), tự động hạ nhỏ nhạc nền & tiếng tụng kinh (Auto-Ducking) xuống 4-5% để giọng đọc to, rõ 100%
+            // Khi AI đang đọc nội dung tác vụ: tự động hạ/tắt nhạc nền & tiếng tụng kinh để giọng đọc AI nổi lên rõ 100%
             const rawAmb = audioSettings.ambient_volume !== undefined ? audioSettings.ambient_volume : 0.25;
-            const ambVol = isPlayingAudio
-                ? 0.02
+            const ambVol = ducking
+                ? 0.0
                 : (isMp3ChantMode
                     ? Math.min(0.25, Math.max(0.0, rawAmb * 0.22))
                     : Math.min(1.0, Math.max(0.05, rawAmb * 0.75)));
-            bgMusicPlayer.volume = ambVol;
-            if (ambVol > 0.005) {
+            try { bgMusicPlayer.volume = ambVol; } catch (e) {}
+            if (ambVol > 0.005 && !ducking) {
                 if (bgMusicPlayer.paused) bgMusicPlayer.play().catch(() => {});
             } else {
                 if (!bgMusicPlayer.paused) bgMusicPlayer.pause();
@@ -1962,19 +2020,59 @@
                 if (!bgSutraMp3Player) {
                     bgSutraMp3Player = new Audio(targetSrc);
                     bgSutraMp3Player.loop = true;
+                    bgSutraMp3Player.playsInline = true;
+                    bgSutraMp3Player.setAttribute("playsinline", "true");
                 } else if (!bgSutraMp3Player.src.includes(targetSrc.split("?")[0])) {
                     bgSutraMp3Player.pause();
                     bgSutraMp3Player = new Audio(targetSrc);
                     bgSutraMp3Player.loop = true;
+                    bgSutraMp3Player.playsInline = true;
+                    bgSutraMp3Player.setAttribute("playsinline", "true");
                 }
                 const baseChant = Math.min(1.0, Math.max(0.15, (audioSettings.chant_volume || 1.5) * 0.65));
-                // Auto-Ducking sâu: hạ tiếng tụng kinh nền xuống 0.02 (2%) khi AI đang đọc tên Phật tử & lời khấn/quẻ xăm
-                bgSutraMp3Player.volume = isPlayingAudio ? 0.02 : baseChant;
-                if (bgSutraMp3Player.paused) {
-                    bgSutraMp3Player.play().then(() => {
-                        const btn = document.getElementById("audio-unlock-btn");
-                        if (btn) btn.style.display = "none";
-                    }).catch(() => {});
+                if (ducking) {
+                    if (chantFadeInterval) {
+                        clearInterval(chantFadeInterval);
+                        chantFadeInterval = null;
+                    }
+                    // Hạ âm lượng kinh nền xuống mức thì thầm 0.008 (0.8%) trên PC.
+                    // Đặc biệt trên Điện Thoại (iOS/Android nơi hệ điều hành khóa volume HTML5 ở 100%),
+                    // tạm dừng kinh nền trong lúc AI đọc và tự động phát tiếp ngay khi AI đọc xong để không bao giờ chèn tiếng!
+                    try { bgSutraMp3Player.volume = 0.008; } catch (e) {}
+                    if (IS_MOBILE_DEVICE || bgSutraMp3Player.volume > 0.03) {
+                        if (!bgSutraMp3Player.paused) {
+                            bgSutraMp3Player.pause();
+                        }
+                    }
+                } else {
+                    if (bgSutraMp3Player.paused) {
+                        try { bgSutraMp3Player.volume = 0.06; } catch (e) {}
+                        bgSutraMp3Player.play().then(() => {
+                            const btn = document.getElementById("audio-unlock-btn");
+                            if (btn) btn.style.display = "none";
+                        }).catch(() => {});
+                    }
+                    // Tăng dần (Fade-in) âm lượng tụng kinh trở lại mượt mà sau khi AI đọc xong
+                    if (chantFadeInterval) clearInterval(chantFadeInterval);
+                    let curV = 0.08;
+                    try { curV = Math.max(0.06, Math.min(baseChant, bgSutraMp3Player.volume || 0.08)); } catch (e) {}
+                    if (Math.abs(curV - baseChant) > 0.04) {
+                        chantFadeInterval = setInterval(() => {
+                            if (isVoiceDuckingActive() || !bgSutraMp3Player) {
+                                clearInterval(chantFadeInterval);
+                                chantFadeInterval = null;
+                                return;
+                            }
+                            curV = Math.min(baseChant, curV + 0.12);
+                            try { bgSutraMp3Player.volume = curV; } catch (e) {}
+                            if (curV >= baseChant - 0.01) {
+                                clearInterval(chantFadeInterval);
+                                chantFadeInterval = null;
+                            }
+                        }, 90);
+                    } else {
+                        try { bgSutraMp3Player.volume = baseChant; } catch (e) {}
+                    }
                 }
             } else {
                 if (bgSutraMp3Player && !bgSutraMp3Player.paused) {
@@ -1985,6 +2083,7 @@
 
         function unlockAndTestAudio() {
             getAudioCtx();
+            unlockMobileVoicePlayers();
             startAmbientMeditationMusic();
             syncMp3Players();
             if (!isPlayingAudio && audioSettings.sutra_mode !== "mp3_kinh_phat" && audioSettings.sutra_mode !== "chu_dai_bi" && audioSettings.sutra_mode !== "mp3_tam_kinh") {
@@ -2000,6 +2099,13 @@
         let isPlayingAudio = false;
 
         function stopCurrentVoiceImmediate() {
+            voicePlayerPool.forEach((p) => {
+                try {
+                    p.onended = null;
+                    p.onerror = null;
+                    p.pause();
+                } catch (e) {}
+            });
             if (currentVoiceAudio) {
                 try {
                     currentVoiceAudio.onended = null;
@@ -2013,6 +2119,7 @@
 
         function enqueueAudio(base64Str, immediate = true) {
             if (!base64Str) return;
+            triggerImmediateDuck(3500);
             if (immediate) {
                 audioQueue.length = 0;
                 stopCurrentVoiceImmediate();
@@ -2025,6 +2132,7 @@
 
         function enqueueVoiceUrl(mp3Url, immediate = true) {
             if (!mp3Url) return;
+            triggerImmediateDuck(3500);
             if (immediate) {
                 audioQueue.length = 0;
                 stopCurrentVoiceImmediate();
@@ -2044,63 +2152,81 @@
             processAudioQueue();
         }
 
-        function attachGainToAudioElement(audioEl, gainValue) {
-            try {
-                const ctx = getAudioCtx();
-                const source = ctx.createMediaElementSource(audioEl);
-                const clarityFilter = ctx.createBiquadFilter();
-                clarityFilter.type = "peaking";
-                clarityFilter.frequency.setValueAtTime(2600, ctx.currentTime);
-                clarityFilter.Q.setValueAtTime(1.2, ctx.currentTime);
-                clarityFilter.gain.setValueAtTime(3.5, ctx.currentTime);
-
-                const voiceGain = ctx.createGain();
-                // Khuếch đại trực tiếp 2.5x - 3.0x ra loa chính (không qua bộ nén để giữ nguyên âm lượng to rõ)
-                voiceGain.gain.setValueAtTime(Math.max(1.8, gainValue * 1.75), ctx.currentTime);
-                source.connect(clarityFilter);
-                clarityFilter.connect(voiceGain);
-                voiceGain.connect(ctx.destination);
-            } catch (e) {}
+        function resolveAudioItemSrc(item) {
+            if (!item) return "";
+            if (item.externalUrl) return item.externalUrl;
+            if (item.url) return item.url;
+            if (item.b64) return "data:audio/mp3;base64," + item.b64;
+            return "";
         }
 
-        function processAudioQueue() {
-            if (isPlayingAudio || audioQueue.length === 0) return;
+        function processAudioQueue(fromChain = false) {
+            if ((!fromChain && isPlayingAudio) || audioQueue.length === 0) return;
             isPlayingAudio = true;
+            voiceDuckHoldUntil = Math.max(voiceDuckHoldUntil, Date.now() + 4000);
             syncMp3Players();
 
             const item = audioQueue.shift();
-            const baseChantVol = Math.max(1.2, audioSettings.chant_volume || 1.5);
-
-            // Nếu là giọng đọc AI động có tên Phật tử (externalUrl Google VI TTS), phát trực tiếp qua HTML5 Audio (không gắn createMediaElementSource để tránh bị CORS làm câm tiếng)
             const isExternalTts = Boolean(item.externalUrl);
-            const audioSrc = item.externalUrl
-                ? item.externalUrl
-                : (item.url ? item.url : ("data:audio/mp3;base64," + item.b64));
-            const mainAudio = new Audio();
-            if (isExternalTts) {
-                mainAudio.referrerPolicy = "no-referrer";
+            const audioSrc = resolveAudioItemSrc(item);
+
+            // Tái sử dụng kênh Audio cố định trong voicePlayerPool để Mobile (iOS/Android) cho phép phát hết 100% các câu nối tiếp
+            const mainAudio = voicePlayerPool[activePoolIdx];
+            voicePoolUnlocked[activePoolIdx] = true;
+            mainAudio.onended = null;
+            mainAudio.onerror = null;
+            mainAudio.referrerPolicy = "no-referrer";
+            if (mainAudio.getAttribute("data-loaded-src") !== audioSrc) {
+                mainAudio.src = audioSrc;
+                mainAudio.setAttribute("data-loaded-src", audioSrc);
             }
-            mainAudio.src = audioSrc;
             currentVoiceAudio = mainAudio;
-            mainAudio.volume = 1.0;
+            try { mainAudio.volume = 1.0; } catch (e) {}
             mainAudio.preservesPitch = true;
             mainAudio.playbackRate = 1.0;
 
-            if (!isExternalTts) {
-                attachGainToAudioElement(mainAudio, baseChantVol);
+            // Nạp trước (Preload) câu tiếp theo vào kênh còn lại trong lúc câu hiện tại đang đọc để chuyển câu 0ms không bị ngắt
+            if (audioQueue.length > 0) {
+                const nextIdx = 1 - activePoolIdx;
+                const nextPlayer = voicePlayerPool[nextIdx];
+                const nextSrc = resolveAudioItemSrc(audioQueue[0]);
+                if (nextSrc && nextPlayer) {
+                    try {
+                        nextPlayer.onended = null;
+                        nextPlayer.onerror = null;
+                        nextPlayer.referrerPolicy = "no-referrer";
+                        nextPlayer.src = nextSrc;
+                        nextPlayer.setAttribute("data-loaded-src", nextSrc);
+                        nextPlayer.load();
+                    } catch (e) {}
+                }
             }
 
             let finished = false;
             const finishAudio = () => {
                 if (finished) return;
                 finished = true;
+                mainAudio.onended = null;
+                mainAudio.onerror = null;
+
+                // Nếu vẫn còn câu tiếp theo trong hàng đợi: giữ nguyên trạng thái Ducking (KHÔNG bật lại tiếng tụng kinh giữa chừng!) và phát tiếp ngay
+                if (audioQueue.length > 0) {
+                    activePoolIdx = 1 - activePoolIdx;
+                    voiceDuckHoldUntil = Math.max(voiceDuckHoldUntil, Date.now() + 3500);
+                    processAudioQueue(true);
+                    return;
+                }
+
                 currentVoiceAudio = null;
                 isPlayingAudio = false;
-                syncMp3Players();
+                voiceDuckHoldUntil = Date.now() + 450;
+                setTimeout(() => {
+                    if (!isPlayingAudio && audioQueue.length === 0) {
+                        syncMp3Players();
+                    }
+                }, 460);
 
-                if (audioQueue.length > 0) {
-                    processAudioQueue();
-                } else if (
+                if (
                     audioSettings.continuous_chant !== false &&
                     audioSettings.sutra_mode !== "mp3_kinh_phat" &&
                     audioSettings.sutra_mode !== "mp3_tam_kinh"
@@ -2122,11 +2248,11 @@
                 // Nếu mạng chặn Google TTS, tự động chuyển sang phát file MP3 tiếng Việt dự phòng (nếu có)
                 if (isExternalTts && item.fallbackUrl) {
                     finished = true;
-                    currentVoiceAudio = null;
-                    isPlayingAudio = false;
+                    mainAudio.onended = null;
+                    mainAudio.onerror = null;
                     audioQueue.length = 0;
                     audioQueue.push({ url: item.fallbackUrl, isSutra: false });
-                    processAudioQueue();
+                    processAudioQueue(true);
                     return;
                 }
                 finishAudio();
@@ -2134,7 +2260,10 @@
 
             mainAudio.onended = finishAudio;
             mainAudio.onerror = handleAudioError;
-            mainAudio.play().catch(handleAudioError);
+            const playPromise = mainAudio.play();
+            if (playPromise && typeof playPromise.catch === "function") {
+                playPromise.catch(handleAudioError);
+            }
         }
 
         function playTempleBell(volScale = 1.0) {
@@ -2298,7 +2427,8 @@
         // Nếu trình duyệt chặn tự phát âm thanh ở mili-giây đầu, tự động kích hoạt ẩn ngay khi chạm/di chuột bất kỳ đâu (không hiện nút bấm)
         ["pointerdown", "pointermove", "touchstart", "touchend", "wheel", "keydown", "click"].forEach((evtName) => {
             window.addEventListener(evtName, () => {
-                if (!ambientAudioStarted || (bgSutraMp3Player && bgSutraMp3Player.paused)) {
+                unlockMobileVoicePlayers();
+                if (!ambientAudioStarted || (bgSutraMp3Player && bgSutraMp3Player.paused && !isVoiceDuckingActive())) {
                     unlockAndTestAudio();
                 }
             }, { passive: true });
@@ -2801,10 +2931,21 @@
                 .trim();
         }
 
-        function splitVietnameseTtsChunks(text, maxLen = 155) {
+        function splitVietnameseTtsChunks(text, maxLen = 185) {
             const clean = cleanSpeechText(text);
             if (!clean) return [];
-            const rawParts = clean.split(/(?<=[.!?;,])\s+/);
+            if (clean.length <= maxLen) return [clean];
+            // Ưu tiên tách tại dấu chấm câu (. ! ?) trước, sau đó mới tách tại dấu phẩy/hai chấm (; : ,) để câu đọc tự nhiên 100%
+            const sentences = clean.split(/(?<=[.!?])\s+/);
+            const rawParts = [];
+            for (const s of sentences) {
+                if (s.length <= maxLen) {
+                    rawParts.push(s);
+                } else {
+                    const subParts = s.split(/(?<=[;:,—-])\s+/);
+                    rawParts.push(...subParts);
+                }
+            }
             const chunks = [];
             let current = "";
             for (const part of rawParts) {
@@ -2834,8 +2975,10 @@
 
         function speakDynamicVietnameseWithName(ttsText, fallbackUrl = "") {
             getAudioCtx();
+            unlockMobileVoicePlayers();
             startAmbientMeditationMusic();
-            const chunks = splitVietnameseTtsChunks(ttsText, 155);
+            triggerImmediateDuck(4200);
+            const chunks = splitVietnameseTtsChunks(ttsText, 185);
             if (chunks.length === 0) {
                 if (fallbackUrl) enqueueVoiceUrl(fallbackUrl, true);
                 return;
@@ -2854,12 +2997,14 @@
         }
 
         function playStudioVietnameseVoice(ttsUrl, ttsText = "") {
+            triggerImmediateDuck(4200);
             if (ttsText) {
                 speakDynamicVietnameseWithName(ttsText, ttsUrl || "");
                 return;
             }
             if (!ttsUrl) return;
             getAudioCtx();
+            unlockMobileVoicePlayers();
             startAmbientMeditationMusic();
             enqueueVoiceUrl(ttsUrl, true);
         }
@@ -2880,6 +3025,7 @@
             const user = (payload.user || "Phật Tử Thiện Tâm").trim();
             const text = (payload.text || "Nam Mô A Di Đà Phật 🙏").trim();
             const cleanWish = cleanSpeechText(text) || "Cầu gia đạo bình an, vạn sự cát tường";
+            const shortWish = cleanWish.length > 52 ? cleanWish.slice(0, 52).trim() : cleanWish;
             const avatarType = payload.avatar_type || "female";
 
             let ev = null;
@@ -2898,7 +3044,7 @@
                     highlight_btn: "incense",
                     global_stats: stats,
                     tts_url: voiceFile,
-                    tts_text: `Nam Mô A Di Đà Phật. Chứng minh công đức Phật tử ${user} thành tâm đứng lên bước tới bát hương dâng hương Tam Bảo, nguyện cầu: ${cleanWish}. Nguyện mười phương Chư Phật gia hộ cho Phật tử ${user} vạn sự bình an, sở cầu như ý.`
+                    tts_text: `Nam Mô A Di Đà Phật. Chứng minh Phật tử ${user} tiến lên bát hương dâng hương, nguyện cầu: ${shortWish}. Chúc Phật tử bình an, sở cầu như ý.`
                 };
             } else if (actionType === "sit_meditate") {
                 const stats = updateCloudGlobalStats(user, 10, 0);
@@ -2911,7 +3057,7 @@
                     highlight_btn: "meditate",
                     global_stats: stats,
                     tts_url: "static/audio/tts/meditate_1.mp3?v=loud1",
-                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} đang tịnh tâm ngồi thiền trên bồ đoàn Chánh Điện, nhất tâm nguyện cầu: ${cleanWish}. Chúc Phật tử ${user} thân tâm thường an lạc, trí tuệ sáng suốt.`
+                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} tịnh tâm ngồi thiền trên Chánh Điện, nguyện cầu: ${shortWish}. Chúc Phật tử thân tâm thường an lạc.`
                 };
             } else if (actionType === "change_seat") {
                 const stats = updateCloudGlobalStats(user, 5, 0);
@@ -2923,7 +3069,7 @@
                     highlight_btn: "move",
                     global_stats: stats,
                     tts_url: "static/audio/tts/move_seat.mp3?v=loud1",
-                    tts_text: `Nam Mô A Di Đà Phật. Hoan hỷ đón Phật tử ${user} di chuyển đến vị trí bồ đoàn trang nghiêm gần tôn tượng Đức Phật.`
+                    tts_text: `Nam Mô A Di Đà Phật. Hoan hỷ đón Phật tử ${user} di chuyển đến vị trí bồ đoàn trang nghiêm gần tôn tượng Đức Phật trên Đại Hùng Bảo Điện.`
                 };
             } else if (actionType === "set_name") {
                 const stats = updateCloudGlobalStats(user, 10, 1);
@@ -2935,11 +3081,13 @@
                     highlight_btn: "name",
                     global_stats: stats,
                     tts_url: "static/audio/tts/set_name.mp3?v=loud1",
-                    tts_text: `Nam Mô A Di Đà Phật. Chào mừng Phật tử ${user} đã an vị trang nghiêm trên Chánh Điện với lời nguyện cầu: ${cleanWish}. Chúc Phật tử ${user} gia đạo bình an, vạn sự cát tường.`
+                    tts_text: `Nam Mô A Di Đà Phật. Chào mừng Phật tử ${user} an vị trên Chánh Điện, nguyện cầu: ${shortWish}. Chúc Phật tử gia đạo bình an, cát tường.`
                 };
             } else if (actionType === "ask_fortune") {
                 const fortune = CLOUD_FORTUNES[Math.floor(Math.random() * CLOUD_FORTUNES.length)];
                 const stats = updateCloudGlobalStats(user, 15, 1);
+                const shortTitle = (fortune.title || "").split("(")[0].trim();
+                const shortMeaning = cleanSpeechText(fortune.meaning || "").slice(0, 68).trim();
                 ev = {
                     type: "FORTUNE",
                     user: user,
@@ -2949,7 +3097,7 @@
                     highlight_btn: "fortune",
                     global_stats: stats,
                     tts_url: fortune.tts_url || "static/audio/tts/fortune_01.mp3?v=loud1",
-                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm xin quẻ xăm: ${cleanWish}. Chúc mừng Phật tử ${user} đã rút được ${fortune.id}, ${fortune.rank}, tên quẻ: ${fortune.title}. Lời bàn: ${fortune.meaning}`
+                    tts_text: `Nam Mô A Di Đà Phật. Chúc mừng Phật tử ${user} rút được ${fortune.id} ${fortune.rank}, ${shortTitle}. ${shortMeaning}.`
                 };
             } else if (actionType === "release_life") {
                 const releaseName = payload.release_name || "Đôi Chim Bồ Câu Trắng";
@@ -2967,7 +3115,7 @@
                     highlight_btn: "release",
                     global_stats: stats,
                     tts_url: "static/audio/tts/release_1.mp3?v=loud1",
-                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức phóng sinh vô lượng của Phật tử ${user} đã phát tâm phóng sinh ${releaseName} ngay tại chỗ ngồi trên Chánh Điện, nguyện cầu: ${cleanWish}. Nguyện hồi hướng công đức lành này cho Phật tử ${user} tiêu trừ nghiệp chướng, tăng trưởng phước thọ, vạn sự cát tường như ý.`
+                    tts_text: `Nam Mô A Di Đà Phật. Tán thán Phật tử ${user} phóng sinh ${releaseName} tại chỗ ngồi, nguyện cầu: ${shortWish}. Chúc Phật tử tăng phước thọ.`
                 };
             } else if (actionType === "donate_lamp") {
                 const offeringName = payload.offering_name || "ĐÈN HOA ĐĂNG LIÊN HOA";
@@ -2989,7 +3137,7 @@
                     highlight_btn: "lamp",
                     global_stats: stats,
                     tts_url: lampVoice,
-                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức vô lượng của Phật tử ${user} đã phát tâm dâng lễ ${offeringName} cúng dường Tam Bảo. Nguyện hồi hướng công đức lành này cho Phật tử ${user} cùng gia quyến phúc lộc viên mãn, vạn sự hanh thông.`
+                    tts_text: `Nam Mô A Di Đà Phật. Tán thán Phật tử ${user} dâng lễ ${offeringName} cúng dường Tam Bảo, nguyện cầu: ${shortWish}. Chúc phúc lộc viên mãn.`
                 };
             } else {
                 const stats = updateCloudGlobalStats(user, 5, 1);
@@ -3000,7 +3148,7 @@
                     avatar_type: avatarType,
                     global_stats: stats,
                     tts_url: "static/audio/tts/incense_1.mp3?v=loud1",
-                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm gửi lời nguyện cầu: ${cleanWish}. Chúc Phật tử ${user} sở cầu như ý.`
+                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm gửi lời nguyện cầu: ${shortWish}. Chúc Phật tử ${user} sở cầu như ý.`
                 };
             }
 
@@ -3031,6 +3179,7 @@
         }, 120);
 
         async function sendDirectChat() {
+            triggerImmediateDuck(3500);
             unlockAndTestAudio();
             const inp = document.getElementById("direct-chat-input");
             if (!inp) return;
@@ -3061,6 +3210,7 @@
 
         // BẤM 1 CHẠM TRỰC TIẾP VÀO NÚT THẮP HƯƠNG / NGỒI THIỀN / ĐỔI CHỖ (KHÔNG CẦN MỞ FORM HAY GÕ SỐ)
         async function directTriggerAction(actionType) {
+            triggerImmediateDuck(4200);
             unlockAndTestAudio();
             const prof = getMyProfile();
             const chatInp = document.getElementById("direct-chat-input");
@@ -3365,6 +3515,7 @@
         };
 
         function openActionModal(mode) {
+            triggerImmediateDuck(3800);
             unlockAndTestAudio();
             activeModalMode = mode;
             flashActionBtn(mode);
@@ -3401,6 +3552,30 @@
             }
 
             document.getElementById("action-modal-backdrop").classList.add("open");
+
+            // Khi bấm thanh tác vụ bên dưới (Đặt Tên / Phóng Sinh / Xin Quẻ / Hương Đèn),
+            // tiếng tụng kinh tự động nhỏ đi ngay lập tức và AI đọc lời dẫn mời Phật tử
+            if (mode === "release") {
+                speakDynamicVietnameseWithName(
+                    `Nam Mô A Di Đà Phật. Mời Phật tử ${prof.name} chọn vật phóng sinh và lời nguyện cầu bình an.`,
+                    "static/audio/tts/release_1.mp3?v=loud1"
+                );
+            } else if (mode === "fortune") {
+                speakDynamicVietnameseWithName(
+                    `Nam Mô A Di Đà Phật. Mời Phật tử ${prof.name} chọn việc mong cầu và bấm lắc ống xăm rút quẻ.`,
+                    "static/audio/tts/fortune_01.mp3?v=loud1"
+                );
+            } else if (mode === "lamp") {
+                speakDynamicVietnameseWithName(
+                    `Nam Mô A Di Đà Phật. Mời Phật tử ${prof.name} chọn lễ vật dâng hương đèn và hoa đăng Tam Bảo.`,
+                    "static/audio/tts/lamp_1.mp3?v=loud1"
+                );
+            } else if (mode === "name") {
+                speakDynamicVietnameseWithName(
+                    `Nam Mô A Di Đà Phật. Mời Phật tử ${prof.name} nhập pháp danh hoặc tên và lời cầu nguyện trên Chánh Điện.`,
+                    "static/audio/tts/set_name.mp3?v=loud1"
+                );
+            }
         }
 
         function closeActionModal() {
@@ -3408,6 +3583,8 @@
         }
 
         async function submitActionModal() {
+            triggerImmediateDuck(4500);
+            unlockAndTestAudio();
             const oldProf = getMyProfile();
             const nameInput = document.getElementById("inp-viewer-name").value.trim() || "Phật Tử Thiện Tâm";
             const wishInput = document.getElementById("inp-viewer-wish").value.trim() || oldProf.wish;
