@@ -65,41 +65,14 @@
             display: flex; align-items: center; gap: 6px;
         }
 
-        /* HOÀNH PHI ĐẠI HÙNG BẢO ĐIỆN NGAY VÒM MÁI CHÙA */
-        .temple-plaque {
-            position: absolute; top: 36px; left: 50%; transform: translateX(-50%); z-index: 20;
-            background: linear-gradient(180deg, rgba(120, 8, 5, 0.85) 0%, rgba(65, 2, 2, 0.90) 100%);
-            border: 1.5px solid #ffd700; outline: 1px solid #b8860b;
-            padding: 2px 16px; border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.75);
-            text-align: center;
-        }
-        .temple-plaque h1 {
-            font-size: 11px; font-weight: 800; color: #fff3a8;
-            letter-spacing: 3px; text-shadow: 0 0 8px #ff9900;
-        }
-
-        /* SỚ CẦU AN ĐẶT TRÊN VÒM TRẦN CAO */
-        .prayer-scroll {
-            position: absolute; top: 82px; left: 50%; transform: translateX(-50%); z-index: 20;
-            background: linear-gradient(135deg, rgba(35, 8, 5, 0.72), rgba(15, 3, 2, 0.78));
-            border: 1px solid rgba(212, 175, 55, 0.75); border-radius: 14px; padding: 2.5px 12px;
-            text-align: center; width: 80%;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.65);
-            backdrop-filter: blur(2px);
-        }
-        .prayer-scroll .title { font-size: 8px; color: #ffcc66; font-weight: 800; letter-spacing: 1.5px; display: none; }
-        .prayer-scroll .content {
-            font-size: 10px; font-weight: bold; color: #fff8dc;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-
-        /* THÔNG BÁO GÓC ZOOM CAMERA 3D GỌN NHẸ TRÊN ĐỈNH */
-        .camera-level-badge {
-            position: absolute; top: 61px; left: 50%; transform: translateX(-50%); z-index: 20;
-            background: rgba(15, 6, 2, 0.62); border: 1px solid rgba(184, 134, 11, 0.65);
-            padding: 1px 8px; border-radius: 10px; font-size: 8.2px; font-weight: bold;
-            color: #ffeb3b; text-align: center; letter-spacing: 0.3px;
+        /* ẨN CÁC DÒNG CHỮ NỔI TRÊN CAO ĐỂ KHÔNG CHE TƯỢNG PHẬT (THEO YÊU CẦU) */
+        .temple-plaque,
+        .prayer-scroll,
+        .camera-level-badge,
+        #audio-unlock-btn {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
         /* BANNER QUÀ TẶNG ROSE & VIP */
@@ -284,24 +257,32 @@
         }
         .direct-chat-send-btn:hover { background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%); color: #1c0602; }
 
-        /* 2. THANH 6 NÚT BẤM TƯƠNG TÁC TRỰC TIẾP 1 HÀNG NGANG FULL ĐÁY MÀN HÌNH (KHÔNG BAO GIỜ BỊ CHE HAY CẮT) */
+        /* 2. THANH 7 NÚT BẤM TƯƠNG TÁC TRỰC TIẾP 1 HÀNG NGANG FULL ĐÁY MÀN HÌNH (CÓ MỤC PHÓNG SINH) */
         .interactive-action-dock {
-            position: absolute; bottom: 6px; left: 6px; right: 6px; height: 46px; z-index: 45;
-            display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
+            position: absolute; bottom: 6px; left: 5px; right: 5px; height: 46px; z-index: 45;
+            display: grid; grid-template-columns: repeat(7, 1fr); gap: 3.5px;
         }
         .action-btn-card {
             background: linear-gradient(180deg, rgba(145, 20, 10, 0.94) 0%, rgba(48, 8, 4, 0.97) 100%);
-            border: 1.5px solid #ffd700; border-radius: 8px; padding: 3px 2px;
+            border: 1.5px solid #ffd700; border-radius: 8px; padding: 3px 1.5px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center; cursor: pointer; user-select: none;
             box-shadow: 0 4px 12px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.25);
             transition: all 0.18s cubic-bezier(0.18, 0.89, 0.32, 1.28);
             position: relative; overflow: hidden;
         }
+        .action-btn-card.release-btn-card {
+            background: linear-gradient(180deg, rgba(16, 95, 68, 0.95) 0%, rgba(6, 42, 30, 0.98) 100%);
+            border-color: #69f0ae;
+        }
         .action-btn-card:hover {
             transform: translateY(-2px) scale(1.03);
             background: linear-gradient(180deg, #c62828 0%, #680905 100%);
             box-shadow: 0 6px 16px rgba(255, 215, 0, 0.65);
+        }
+        .action-btn-card.release-btn-card:hover {
+            background: linear-gradient(180deg, #00897b 0%, #004d40 100%);
+            box-shadow: 0 6px 16px rgba(105, 240, 174, 0.7);
         }
         .action-btn-card:active, .action-btn-card.flash-active {
             transform: scale(1.06);
@@ -314,72 +295,47 @@
             color: #3e1004 !important; text-shadow: none !important;
         }
         .action-btn-card .btn-top-line {
-            display: flex; align-items: center; justify-content: center; gap: 2px;
+            display: flex; align-items: center; justify-content: center; gap: 1.5px;
         }
-        .action-btn-card .btn-icon { font-size: 12.5px; line-height: 1; }
+        .action-btn-card .btn-icon { font-size: 11.5px; line-height: 1; }
         .action-btn-card .btn-title {
-            font-size: 9.6px; font-weight: 800; color: #ffd700;
-            letter-spacing: 0px; text-shadow: 0 1px 2px #000; white-space: nowrap;
+            font-size: 8.8px; font-weight: 800; color: #ffd700;
+            letter-spacing: -0.1px; text-shadow: 0 1px 2px #000; white-space: nowrap;
+        }
+        .action-btn-card.release-btn-card .btn-title {
+            color: #a7ffeb;
         }
         .action-btn-card .btn-sub {
-            font-size: 7.4px; color: #ffe0b2; display: block; margin-top: 1px; font-weight: 600;
+            font-size: 6.9px; color: #ffe0b2; display: block; margin-top: 1px; font-weight: 600;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
         }
 
-        /* GÓC QR ỦNG HỘ HƯƠNG ĐÈN NỔI TRÊN MÀN HÌNH LIVESTREAM (VPBANK 614577808 - NGUYEN BA VUONG) */
-        .floating-qr-badge {
-            position: absolute; top: 108px; right: 6px; width: 92px; z-index: 42;
-            background: linear-gradient(180deg, rgba(45, 10, 5, 0.94), rgba(18, 4, 2, 0.97));
-            border: 1.5px solid #ffd700; border-radius: 10px; padding: 4px;
-            text-align: center; cursor: pointer;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.88), 0 0 12px rgba(255,215,0,0.35);
-            display: block;
-            transition: all 0.22s ease;
-        }
-        .floating-qr-badge:hover {
-            transform: scale(1.05);
-            border-color: #fff;
-            box-shadow: 0 8px 24px rgba(255,215,0,0.65);
-        }
-        .floating-qr-badge.minimized {
-            width: auto; padding: 3px 7px;
-        }
-        .floating-qr-badge.minimized img,
-        .floating-qr-badge.minimized .qr-acc-details {
+        /* ẨN HOÀN TOÀN MÃ QR NỔI TỰ ĐỘNG TRÊN MÀN HÌNH CHÍNH (CHỈ ĐỂ TRONG MỤC HƯƠNG ĐÈN) */
+        .floating-qr-badge,
+        .qr-spotlight-overlay {
             display: none !important;
-        }
-        .floating-qr-badge .qr-badge-header {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 7.8px; font-weight: 900; color: #ffd700; margin-bottom: 2px;
-        }
-        .floating-qr-badge .qr-min-btn {
-            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,215,0,0.5);
-            color: #fff; font-size: 7.5px; padding: 0 3px; border-radius: 3px; cursor: pointer;
-        }
-        .floating-qr-badge img {
-            width: 100%; border-radius: 6px; background: #fff; padding: 2px;
-            display: block;
-        }
-        .floating-qr-badge .qr-acc-details {
-            font-size: 7.6px; font-weight: 800; color: #fff8dc; margin-top: 2px; line-height: 1.2;
-        }
-        .floating-qr-badge .qr-acc-details b {
-            color: #ffd700; font-size: 8.4px; display: block;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
 
-        /* BẢNG QR PHÓNG TO GIỮA MÀN HÌNH KHI PHẬT TỬ TRÊN TIKTOK/FB/YT GÕ "HƯƠNG ĐÈN" HOẶC BẤM PHÓNG TO */
-        .qr-spotlight-overlay {
-            position: absolute; top: 135px; left: 50%; transform: translateX(-50%) scale(0.9);
-            width: 265px; z-index: 75;
-            background: linear-gradient(180deg, #4a0e07 0%, #1c0502 100%);
-            border: 2.5px solid #ffd700; border-radius: 14px; padding: 10px;
-            text-align: center; color: #fff;
-            box-shadow: 0 18px 45px rgba(0,0,0,0.95), 0 0 32px rgba(255, 215, 0, 0.75);
-            opacity: 0; pointer-events: none; transition: all 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        /* LƯỚI ĐỀ XUẤT VẬT PHÓNG SINH TRONG MODAL */
+        .release-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 6px;
         }
-        .qr-spotlight-overlay.active {
-            opacity: 1; pointer-events: auto; transform: translateX(-50%) scale(1);
+        .release-item-card {
+            background: rgba(16, 65, 48, 0.55); border: 1px solid rgba(105, 240, 174, 0.5);
+            border-radius: 8px; padding: 6px 8px; cursor: pointer;
+            display: flex; align-items: center; gap: 7px; transition: all 0.15s;
         }
+        .release-item-card:hover, .release-item-card.active {
+            background: linear-gradient(135deg, rgba(0, 121, 107, 0.9), rgba(4, 65, 52, 0.95));
+            border-color: #ffd700; box-shadow: 0 0 12px rgba(105, 240, 174, 0.5);
+            transform: translateY(-1px);
+        }
+        .release-item-card .r-icon { font-size: 20px; line-height: 1; flex-shrink: 0; }
+        .release-item-card .r-info { flex: 1; min-width: 0; }
+        .release-item-card .r-name { font-size: 10.5px; font-weight: 800; color: #ffd700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .release-item-card .r-desc { font-size: 9px; color: #b2dfdb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* POPUP TƯƠNG TÁC TRỰC TIẾP TRÊN MÀN HÌNH CHÁNH ĐIỆN */
         .action-modal-backdrop {
@@ -583,7 +539,7 @@
         <div id="lb-list"></div>
     </div>
 
-    <!-- 2. THANH 6 NÚT BẤM TƯƠNG TÁC TRỰC TIẾP 1 HÀNG NGANG SÁT ĐÁY (HIỂN THỊ ĐẦY ĐỦ 100%, KHÔNG BỊ CHE) -->
+    <!-- 2. THANH 7 NÚT BẤM TƯƠNG TÁC TRỰC TIẾP 1 HÀNG NGANG SÁT ĐÁY (CÓ MỤC PHÓNG SINH) -->
     <div class="interactive-action-dock">
         <div class="action-btn-card" id="btn-action-name" onclick="openActionModal('name')">
             <div class="btn-top-line"><span class="btn-icon">✍️</span><span class="btn-title">Đặt Tên</span></div>
@@ -591,7 +547,7 @@
         </div>
         <div class="action-btn-card" id="btn-action-incense" onclick="directTriggerAction('stand_incense')">
             <div class="btn-top-line"><span class="btn-icon">🚶</span><span class="btn-title">Thắp Hương</span></div>
-            <span class="btn-sub">Đứng lên hương</span>
+            <span class="btn-sub">Lên bát hương</span>
         </div>
         <div class="action-btn-card" id="btn-action-meditate" onclick="directTriggerAction('sit_meditate')">
             <div class="btn-top-line"><span class="btn-icon">🧘</span><span class="btn-title">Ngồi Thiền</span></div>
@@ -601,17 +557,21 @@
             <div class="btn-top-line"><span class="btn-icon">🔄</span><span class="btn-title">Đổi Chỗ</span></div>
             <span class="btn-sub">Đổi đệm ngồi</span>
         </div>
+        <div class="action-btn-card release-btn-card" id="btn-action-release" onclick="openActionModal('release')">
+            <div class="btn-top-line"><span class="btn-icon">🕊️</span><span class="btn-title">Phóng Sinh</span></div>
+            <span class="btn-sub">Thả chim, cá...</span>
+        </div>
         <div class="action-btn-card" id="btn-action-fortune" onclick="openActionModal('fortune')">
             <div class="btn-top-line"><span class="btn-icon">🎋</span><span class="btn-title">Xin Quẻ</span></div>
             <span class="btn-sub">Lắc ống xăm</span>
         </div>
         <div class="action-btn-card" id="btn-action-lamp" onclick="openActionModal('lamp')">
             <div class="btn-top-line"><span class="btn-icon">🏮</span><span class="btn-title">Hương Đèn</span></div>
-            <span class="btn-sub">Cúng dường</span>
+            <span class="btn-sub">Dâng hoa đăng</span>
         </div>
     </div>
 
-    <!-- POPUP MODAL ĐẶT TÊN / XIN QUẺ / ỦNG HỘ HƯƠNG ĐÈN TRỰC TIẾP -->
+    <!-- POPUP MODAL ĐẶT TÊN / PHÓNG SINH / XIN QUẺ / HƯƠNG ĐÈN TRỰC TIẾP -->
     <div class="action-modal-backdrop" id="action-modal-backdrop" onclick="if(event.target===this) closeActionModal()">
         <div class="action-modal-box">
             <button class="action-modal-close" onclick="closeActionModal()">✕</button>
@@ -639,26 +599,61 @@
                 </select>
             </div>
 
-            <!-- Khối chọn Vật Phẩm Ủng Hộ Hương Đèn + Mã QR VPBank Nguyễn Bá Vương -->
+            <!-- Khối chọn Vật Phóng Sinh (dành cho mục Phóng Sinh) -->
+            <div class="modal-field" id="field-release-select" style="display:none;">
+                <label>🕊️ Chọn Vật Phóng Sinh (Bay lên từ chỗ ngồi của bạn):</label>
+                <select id="sel-release-creature" onchange="syncReleaseCardHighlight(this.value)">
+                    <option value="Đôi Chim Bồ Câu Trắng|dove|25">🕊️ Đôi Chim Bồ Câu Trắng (Cầu Hòa Hợp & Bình An • +25 CĐ)</option>
+                    <option value="Đàn Chim Én Mùa Xuân|swallow|25">🐦 Đàn Chim Én Mùa Xuân (Cầu Cát Tường & Hỷ Sự • +25 CĐ)</option>
+                    <option value="Đàn Chim Hạc Vàng Linh Thiêng|crane|35">🦢 Đàn Chim Hạc Vàng Linh Thiêng (Cầu Sức Khỏe & Trường Thọ • +35 CĐ)</option>
+                    <option value="Đàn Bướm Hoàng Kim|butterfly|20">🦋 Đàn Bướm Hoàng Kim (Cầu Duyên Lành & An Lạc • +20 CĐ)</option>
+                    <option value="Đàn Cá Chép Vàng Hóa Rồng|koi|30">🐟 Đàn Cá Chép Vàng Hóa Rồng (Cầu Thi Cử & Tài Lộc • +30 CĐ)</option>
+                    <option value="Rùa Vàng Linh Quy|turtle|35">🐢 Rùa Vàng Linh Quy (Cầu Phước Thọ Vững Bền • +35 CĐ)</option>
+                </select>
+                <div class="release-grid" id="release-cards-grid">
+                    <div class="release-item-card active" data-val="Đôi Chim Bồ Câu Trắng|dove|25" onclick="selectReleaseCreatureCard(this)">
+                        <span class="r-icon">🕊️</span>
+                        <div class="r-info"><div class="r-name">Bồ Câu Trắng</div><div class="r-desc">Bình an, hòa hợp</div></div>
+                    </div>
+                    <div class="release-item-card" data-val="Đàn Chim Én Mùa Xuân|swallow|25" onclick="selectReleaseCreatureCard(this)">
+                        <span class="r-icon">🐦</span>
+                        <div class="r-info"><div class="r-name">Chim Én Xuân</div><div class="r-desc">May mắn, cát tường</div></div>
+                    </div>
+                    <div class="release-item-card" data-val="Đàn Chim Hạc Vàng Linh Thiêng|crane|35" onclick="selectReleaseCreatureCard(this)">
+                        <span class="r-icon">🦢</span>
+                        <div class="r-info"><div class="r-name">Chim Hạc Vàng</div><div class="r-desc">Sức khỏe, trường thọ</div></div>
+                    </div>
+                    <div class="release-item-card" data-val="Đàn Bướm Hoàng Kim|butterfly|20" onclick="selectReleaseCreatureCard(this)">
+                        <span class="r-icon">🦋</span>
+                        <div class="r-info"><div class="r-name">Bướm Hoàng Kim</div><div class="r-desc">Duyên lành, an lạc</div></div>
+                    </div>
+                    <div class="release-item-card" data-val="Đàn Cá Chép Vàng Hóa Rồng|koi|30" onclick="selectReleaseCreatureCard(this)">
+                        <span class="r-icon">🐟</span>
+                        <div class="r-info"><div class="r-name">Cá Chép Hóa Rồng</div><div class="r-desc">Công danh, tài lộc</div></div>
+                    </div>
+                    <div class="release-item-card" data-val="Rùa Vàng Linh Quy|turtle|35" onclick="selectReleaseCreatureCard(this)">
+                        <span class="r-icon">🐢</span>
+                        <div class="r-info"><div class="r-name">Rùa Linh Quy</div><div class="r-desc">Phước thọ miên trường</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khối chọn Vật Phẩm Hương Đèn (Mã QR gọn nhẹ chỉ nằm bên trong mục Hương Đèn, không hiện số tài khoản phản cảm) -->
             <div class="modal-field" id="field-lamp-select" style="display:none;">
-                <label>🏮 Chọn Lễ Vật Ủng Hộ Hương Đèn Tam Bảo:</label>
+                <label>🏮 Chọn Lễ Vật Dâng Hương Đèn Tam Bảo:</label>
                 <select id="sel-lamp-offering">
                     <option value="ĐÈN HOA ĐĂNG LIÊN HOA|3">🏮 Đèn Hoa Đăng Liên Hoa (+60 Công Đức)</option>
                     <option value="DẦU ĐỐT ĐÈN CHÁNH ĐIỆN|5">🔥 Dầu Đốt Đèn Chánh Điện (+100 Công Đức)</option>
                     <option value="HOA SEN VÀNG CÚNG PHẬT|10">🪷 Hoa Sen Vàng Cúng Phật (+200 Công Đức)</option>
                     <option value="ĐẠI HỒNG CHUNG CẦU QUỐC THÁI|25">🔔 Đại Hồng Chung Cầu Quốc Thái (+500 Công Đức)</option>
                 </select>
-                <div style="display:flex; align-items:center; gap:10px; margin-top:8px; background:rgba(0,0,0,0.55); padding:9px; border-radius:10px; border:1.5px solid #ffd700;">
-                    <img id="modal-qr-img" src="static/qr_vpbank_vuong.png?v=614577808" style="width:118px; height:auto; border-radius:8px; background:#fff; padding:3px; flex-shrink:0;" alt="QR VPBank Nguyễn Bá Vương">
-                    <div style="font-size:11.2px; line-height:1.5; color:#ffecb3; flex:1;">
-                        <div style="color:#ffd700; font-weight:900; font-size:12px;">🏮 CÔNG ĐỨC HƯƠNG ĐÈN</div>
-                        <div>Ngân hàng: <b id="lbl-bank-id" style="color:#4ade80;">VPBank</b></div>
-                        <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
-                            <span>Số TK: <b id="lbl-acc-no" style="color:#ffd700; font-size:13px;">614577808</b></span>
-                            <button type="button" onclick="copyBankAccount()" id="btn-copy-stk" style="background:#ffd700; color:#2b0904; border:none; border-radius:5px; padding:1.5px 6px; font-size:9.5px; font-weight:800; cursor:pointer;">📋 Copy</button>
-                        </div>
-                        <div>Chủ TK: <b id="lbl-acc-name" style="color:#fff;">NGUYEN BA VUONG</b></div>
-                        <div style="font-size:9.8px; color:#80d8ff; margin-top:3px;">(Quét mã QR VPBank hoặc bấm nút dưới để thả Hoa Đăng & vinh danh trên Chánh Điện)</div>
+                <div style="margin-top:7px; text-align:center;">
+                    <button type="button" onclick="const box=document.getElementById('discreet-qr-box'); box.style.display=(box.style.display==='none'?'block':'none');" style="background:rgba(255,215,0,0.14); border:1px dashed rgba(255,215,0,0.65); color:#ffe082; border-radius:8px; padding:5px 10px; font-size:10.5px; font-weight:700; cursor:pointer; width:100%;">
+                        🙏 Gieo duyên hỷ cúng Hương Đèn Tam Bảo (Bấm để mở mã QR)
+                    </button>
+                    <div id="discreet-qr-box" style="display:none; margin-top:7px; background:rgba(0,0,0,0.45); padding:8px; border-radius:10px; border:1px solid rgba(255,215,0,0.5);">
+                        <img id="modal-qr-img" src="static/qr_vpbank_square.png?v=614577808" style="width:130px; height:130px; border-radius:8px; background:#fff; padding:4px; margin:0 auto; display:block;" alt="QR Hỷ Cúng Hương Đèn">
+                        <div style="font-size:10px; color:#ffecb3; margin-top:4px;">Quét mã QR tùy tâm công đức hương đèn Tam Bảo 🙏</div>
                     </div>
                 </div>
             </div>
@@ -934,6 +929,227 @@
             };
             scene.add(spr);
             lanterns.push(spr);
+        }
+
+        // =========================================================================
+        // 7B. HỆ THỐNG 3D PHÓNG SINH TẠI CHỖ NGỒI (CHIM BỒ CÂU, CHIM ÉN, HẠC VÀNG, BƯỚM, CÁ CHÉP, RÙA LINH QUY BAY LÊN TỪ BỒ ĐOÀN)
+        // =========================================================================
+        const releaseFlock = [];
+        const releaseRings = [];
+        const releaseTextureCache = {};
+
+        function getReleaseCreatureMaterials(creatureCode = "dove") {
+            if (releaseTextureCache[creatureCode]) return releaseTextureCache[creatureCode];
+
+            const configs = {
+                dove:      { emoji: "🕊️", glow1: "rgba(255, 255, 255, 0.95)", glow2: "rgba(179, 229, 252, 0.55)", wingColor: "#ffffff", stroke: "#ffd700" },
+                swallow:   { emoji: "🐦", glow1: "rgba(224, 247, 250, 0.95)", glow2: "rgba(100, 255, 218, 0.55)", wingColor: "#80deea", stroke: "#ffd700" },
+                crane:     { emoji: "🦢", glow1: "rgba(255, 248, 225, 0.96)", glow2: "rgba(255, 215, 64, 0.65)",  wingColor: "#ffe082", stroke: "#ff6f00" },
+                butterfly: { emoji: "🦋", glow1: "rgba(255, 245, 157, 0.95)", glow2: "rgba(255, 171, 64, 0.58)",  wingColor: "#ffd54f", stroke: "#fff" },
+                koi:       { emoji: "🐟", glow1: "rgba(255, 236, 179, 0.95)", glow2: "rgba(255, 110, 64, 0.62)",  wingColor: "#ffab40", stroke: "#ffd700" },
+                turtle:    { emoji: "🐢", glow1: "rgba(200, 230, 201, 0.95)", glow2: "rgba(105, 240, 174, 0.60)", wingColor: "#69f0ae", stroke: "#ffd700" }
+            };
+            const cfg = configs[creatureCode] || configs.dove;
+            const mats = [0, 1].map((frameIdx) => {
+                const c = document.createElement("canvas");
+                c.width = 180; c.height = 180;
+                const ctx = c.getContext("2d");
+
+                // Quầng hào quang kim quang bao quanh vật phóng sinh
+                const g = ctx.createRadialGradient(90, 90, 8, 90, 90, 78);
+                g.addColorStop(0, cfg.glow1);
+                g.addColorStop(0.5, cfg.glow2);
+                g.addColorStop(1, "rgba(255, 215, 0, 0)");
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(90, 90, 76, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Vẽ đôi cánh ánh sáng vỗ nhịp nhàng (Frame 0: Cánh nâng cao, Frame 1: Cánh hạ đập)
+                ctx.save();
+                ctx.translate(90, 90);
+                const wingAngle = frameIdx === 0 ? -0.38 : 0.28;
+                ctx.strokeStyle = cfg.wingColor;
+                ctx.lineWidth = 4.5;
+                ctx.shadowColor = "#ffd700";
+                ctx.shadowBlur = 12;
+
+                // Cánh trái ánh sáng
+                ctx.save();
+                ctx.rotate(wingAngle);
+                ctx.beginPath();
+                ctx.moveTo(-10, 0);
+                ctx.quadraticCurveTo(-48, -32, -70, frameIdx === 0 ? -18 : 14);
+                ctx.quadraticCurveTo(-42, 12, -10, 6);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+
+                // Cánh phải ánh sáng
+                ctx.save();
+                ctx.rotate(-wingAngle);
+                ctx.beginPath();
+                ctx.moveTo(10, 0);
+                ctx.quadraticCurveTo(48, -32, 70, frameIdx === 0 ? -18 : 14);
+                ctx.quadraticCurveTo(42, 12, 10, 6);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+
+                // Vẽ hình vật phóng sinh trung tâm rõ nét
+                ctx.font = "68px 'Segoe UI Emoji', 'Apple Color Emoji', sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(cfg.emoji, 0, frameIdx === 0 ? -4 : 4);
+
+                // Các hạt kim quang lấp lánh dưới đuôi khi bay lên
+                ctx.fillStyle = "#ffd700";
+                [[-22, 44], [0, 56], [24, 42], [-12, 66], [14, 64]].forEach(([px, py]) => {
+                    ctx.beginPath();
+                    ctx.arc(px, py + (frameIdx === 0 ? 0 : 5), 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                ctx.restore();
+                const tex = new THREE.CanvasTexture(c);
+                if (tex.colorSpace !== undefined) tex.colorSpace = THREE.SRGBColorSpace;
+                return new THREE.SpriteMaterial({
+                    map: tex,
+                    transparent: true,
+                    opacity: 0.98,
+                    depthWrite: false
+                });
+            });
+
+            releaseTextureCache[creatureCode] = mats;
+            return mats;
+        }
+
+        function createReleaseBannerSprite(userName, creatureTitle) {
+            const c = document.createElement("canvas");
+            c.width = 512; c.height = 110;
+            const ctx = c.getContext("2d");
+
+            ctx.fillStyle = "rgba(6, 48, 34, 0.92)";
+            ctx.strokeStyle = "#ffd700";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            if (ctx.roundRect) ctx.roundRect(16, 12, 480, 84, 42);
+            else ctx.rect(16, 12, 480, 84);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.font = "900 30px 'Segoe UI', Tahoma, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "#ffd700";
+            ctx.fillText(`🕊️ ${userName.substring(0, 14)} PHÓNG SINH`, 256, 39);
+
+            ctx.font = "bold 25px 'Segoe UI', Tahoma, sans-serif";
+            ctx.fillStyle = "#a7ffeb";
+            ctx.fillText(`✨ ${creatureTitle} ✨`, 256, 73);
+
+            const tex = new THREE.CanvasTexture(c);
+            tex.minFilter = THREE.LinearFilter;
+            tex.generateMipmaps = false;
+            if (tex.colorSpace !== undefined) tex.colorSpace = THREE.SRGBColorSpace;
+            const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+            const spr = new THREE.Sprite(mat);
+            spr.scale.set(1.15, 0.25, 1);
+            spr.renderOrder = 950;
+            return spr;
+        }
+
+        function spawnLifeReleaseAtSeat(userName, creatureCode = "dove", creatureTitle = "Đôi Chim Bồ Câu Trắng") {
+            let dev = devotees.get(userName);
+            if (!dev) {
+                const prof = getMyProfile();
+                dev = spawnOrUpdateDevotee(userName, `Phóng sinh ${creatureTitle}`, prof.avatar || "female", true);
+            }
+            const seatX = dev && dev.seat ? dev.seat.x : 0;
+            const seatY = dev && dev.seat ? dev.seat.y + 0.18 : 0.2;
+            const seatZ = dev && dev.seat ? dev.seat.z : 2.05;
+
+            if (dev) {
+                dev.interactPulseUntil = performance.now() + 5500;
+                dev.statusHint = `🕊️ Phóng sinh: ${creatureTitle}`;
+                dev.refreshTexture();
+                setTimeout(() => {
+                    if (dev && dev.statusHint && dev.statusHint.includes("Phóng sinh")) {
+                        dev.statusHint = "";
+                        dev.refreshTexture();
+                    }
+                }, 5500);
+            }
+
+            // 1. Tạo vòng hào quang Liên Hoa tỏa sáng ngay tại đệm ngồi của Phật tử
+            const ringGeo = new THREE.RingGeometry(0.12, 0.32, 32);
+            const ringMat = new THREE.MeshBasicMaterial({
+                color: 0x69f0ae,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.92,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+            ringMesh.position.set(seatX, seatY - 0.12, seatZ);
+            ringMesh.rotation.x = -Math.PI / 2.3;
+            ringMesh.userData = { age: 0, maxAge: 2.4 };
+            scene.add(ringMesh);
+            releaseRings.push(ringMesh);
+
+            // 2. Tạo thẻ vinh danh bay nhẹ từ chỗ ngồi của Phật tử lên cao
+            const bannerSpr = createReleaseBannerSprite(userName, creatureTitle);
+            bannerSpr.position.set(seatX, seatY + 0.45, seatZ);
+            bannerSpr.userData = {
+                isBanner: true,
+                baseX: seatX,
+                vy: 0.011,
+                vz: -0.004,
+                age: 0,
+                maxAge: 3.8,
+                flapPhase: 0
+            };
+            scene.add(bannerSpr);
+            releaseFlock.push(bannerSpr);
+
+            // 3. Tạo đàn 12 vật phóng sinh vỗ cánh bay vút lên từ chính chỗ ngồi của Phật tử hướng về tượng Phật & bầu trời
+            const mats = getReleaseCreatureMaterials(creatureCode);
+            const count = 12;
+            for (let i = 0; i < count; i++) {
+                const spr = new THREE.Sprite(mats[i % 2]);
+                const initScale = 0.28 + (i % 3) * 0.06;
+                spr.scale.set(initScale, initScale, 1);
+
+                const angle = (i / count) * Math.PI * 2;
+                const radius = 0.08 + (i % 3) * 0.09;
+                const startX = seatX + Math.cos(angle) * radius;
+                const startY = seatY + (i * 0.04);
+                const startZ = seatZ + Math.sin(angle) * 0.08;
+
+                spr.position.set(startX, startY, startZ);
+                spr.renderOrder = 920 + i;
+                spr.userData = {
+                    isBanner: false,
+                    mats: mats,
+                    baseScale: initScale,
+                    baseX: startX,
+                    targetX: (Math.random() - 0.5) * 2.2,
+                    vy: 0.019 + Math.random() * 0.014,
+                    vz: -0.012 - Math.random() * 0.010,
+                    swayAmp: 0.18 + Math.random() * 0.24,
+                    swayFreq: 2.2 + Math.random() * 1.8,
+                    flapPhase: Math.random() * Math.PI * 2,
+                    delay: i * 0.09,
+                    age: 0,
+                    maxAge: 4.8 + Math.random() * 1.2
+                };
+                scene.add(spr);
+                releaseFlock.push(spr);
+            }
         }
 
         // =========================================================================
@@ -1949,6 +2165,30 @@
         function playWoodenFishSound() {}
         function playWoodenFishBurst() {}
 
+        function playLifeReleaseChime() {
+            try {
+                playTempleBell(1.0);
+                const ctx = getAudioCtx();
+                const now = ctx.currentTime;
+                const notes = [880, 1046.5, 1318.5, 1567.98, 1760];
+                notes.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = "sine";
+                    const t0 = now + 0.15 + idx * 0.11;
+                    osc.frequency.setValueAtTime(freq, t0);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.12, t0 + 0.18);
+                    gain.gain.setValueAtTime(0.001, t0);
+                    gain.gain.linearRampToValueAtTime(0.14, t0 + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.0005, t0 + 0.45);
+                    osc.connect(gain);
+                    gain.connect(masterCompressor);
+                    osc.start(t0);
+                    osc.stop(t0 + 0.46);
+                });
+            } catch (e) {}
+        }
+
         // HIỆU ỨNG ĐẠI CHÚNG THIỀN ĐỊNH, CẦU NGUYỆN & DÂNG HƯƠNG TRÊN THẢM ĐỎ CHÁNH ĐIỆN
         const COLLECTIVE_CHANTS = [
             "cầu cho con trúng 2 tỷ vé số",
@@ -2039,20 +2279,33 @@
         }
 
         // =========================================================================
-        // 11. PHÁT NHẠC THIỀN MP3 THẬT CHẠY NỀN 24/7 (/static/audio/nhac_thien.mp3)
+        // 11. PHÁT TỤNG KINH & NHẠC THIỀN MẶC ĐỊNH TỰ ĐỘNG NGAY KHI VÀO TRANG (KHÔNG CẦN BẤM NÚT)
         // =========================================================================
         let ambientAudioStarted = false;
         function startAmbientMeditationMusic() {
-            if (ambientAudioStarted) return;
             ambientAudioStarted = true;
             syncMp3Players();
         }
-        window.addEventListener('click', () => {
-            unlockAndTestAudio();
-        }, { once: true });
+
+        // Tự động phát kinh mặc định ngay lập tức khi mở trang
+        startAmbientMeditationMusic();
+        window.addEventListener("DOMContentLoaded", () => {
+            startAmbientMeditationMusic();
+        });
+        window.addEventListener("load", () => {
+            startAmbientMeditationMusic();
+        });
+        // Nếu trình duyệt chặn tự phát âm thanh ở mili-giây đầu, tự động kích hoạt ẩn ngay khi chạm/di chuột bất kỳ đâu (không hiện nút bấm)
+        ["pointerdown", "pointermove", "touchstart", "touchend", "wheel", "keydown", "click"].forEach((evtName) => {
+            window.addEventListener(evtName, () => {
+                if (!ambientAudioStarted || (bgSutraMp3Player && bgSutraMp3Player.paused)) {
+                    unlockAndTestAudio();
+                }
+            }, { passive: true });
+        });
 
         // =========================================================================
-        // 12. VÒNG LẶP RENDER CHÍNH (60 FPS + CHUYỂN ĐỘNG ĐI BỘ THẢM ĐỎ + CÁNH SEN RƠI)
+        // 12. VÒNG LẶP RENDER CHÍNH (60 FPS + CHUYỂN ĐỘNG ĐI BỘ THẢM ĐỎ + PHÓNG SINH BAY LÊN + CÁNH SEN RƠI)
         // =========================================================================
         let clock = new THREE.Clock();
 
@@ -2099,6 +2352,62 @@
                 if (l.position.z <= l.userData.targetZ) {
                     scene.remove(l);
                     lanterns.splice(i, 1);
+                }
+            }
+
+            // Chuyển động Vòng Hào Quang Phóng Sinh dưới chỗ ngồi Phật tử
+            for (let i = releaseRings.length - 1; i >= 0; i--) {
+                const r = releaseRings[i];
+                r.userData.age += 0.016;
+                const progress = r.userData.age / r.userData.maxAge;
+                if (progress >= 1) {
+                    scene.remove(r);
+                    r.geometry.dispose();
+                    r.material.dispose();
+                    releaseRings.splice(i, 1);
+                } else {
+                    const sc = 1.0 + progress * 4.2;
+                    r.scale.set(sc, sc, 1);
+                    r.material.opacity = (1.0 - progress) * 0.85;
+                }
+            }
+
+            // Chuyển động Đàn Vật Phóng Sinh vỗ cánh bay từ chỗ ngồi Phật tử lên bầu trời Chánh Điện
+            for (let i = releaseFlock.length - 1; i >= 0; i--) {
+                const c = releaseFlock[i];
+                const u = c.userData;
+                u.age += 0.016;
+                if (u.delay && u.age < u.delay) continue;
+
+                const activeAge = u.age - (u.delay || 0);
+                const progress = activeAge / u.maxAge;
+                if (progress >= 1 || c.position.y > 5.8) {
+                    scene.remove(c);
+                    if (u.isBanner) {
+                        if (c.material.map) c.material.map.dispose();
+                        c.material.dispose();
+                    }
+                    releaseFlock.splice(i, 1);
+                    continue;
+                }
+
+                if (u.isBanner) {
+                    c.position.y += u.vy;
+                    c.position.z += u.vz;
+                    c.material.opacity = progress > 0.7 ? (1.0 - (progress - 0.7) / 0.3) : 1.0;
+                } else {
+                    // Đổi frame vỗ cánh liên tục và lượn vòng xoắn ốc hướng lên tượng Phật
+                    const flapIdx = Math.floor(time * 11 + u.flapPhase) % 2;
+                    if (u.mats && u.mats[flapIdx]) {
+                        c.material = u.mats[flapIdx];
+                    }
+                    const wingStretch = 1.0 + Math.sin(time * 14 + u.flapPhase) * 0.14;
+                    const growScale = u.baseScale * (1.0 + Math.min(progress * 0.45, 0.35));
+                    c.scale.set(growScale * wingStretch, growScale, 1);
+
+                    c.position.y += u.vy * (1.0 + progress * 0.4);
+                    c.position.z += u.vz;
+                    c.position.x = THREE.MathUtils.lerp(u.baseX, u.targetX, Math.min(progress * 0.8, 1)) + Math.sin(time * u.swayFreq + u.flapPhase) * u.swayAmp;
                 }
             }
 
@@ -2642,6 +2951,24 @@
                     tts_url: fortune.tts_url || "static/audio/tts/fortune_01.mp3?v=loud1",
                     tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm xin quẻ xăm: ${cleanWish}. Chúc mừng Phật tử ${user} đã rút được ${fortune.id}, ${fortune.rank}, tên quẻ: ${fortune.title}. Lời bàn: ${fortune.meaning}`
                 };
+            } else if (actionType === "release_life") {
+                const releaseName = payload.release_name || "Đôi Chim Bồ Câu Trắng";
+                const creatureCode = payload.creature_code || "dove";
+                const meritAdded = parseInt(payload.merit_added || 25, 10);
+                const stats = updateCloudGlobalStats(user, meritAdded, 1);
+                ev = {
+                    type: "LIFE_RELEASE",
+                    user: user,
+                    text: text || `Phóng sinh ${releaseName} cầu bình an phước thọ 🙏`,
+                    avatar_type: avatarType,
+                    release_name: releaseName,
+                    creature_code: creatureCode,
+                    merit_added: meritAdded,
+                    highlight_btn: "release",
+                    global_stats: stats,
+                    tts_url: "static/audio/tts/release_1.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức phóng sinh vô lượng của Phật tử ${user} đã phát tâm phóng sinh ${releaseName} ngay tại chỗ ngồi trên Chánh Điện, nguyện cầu: ${cleanWish}. Nguyện hồi hướng công đức lành này cho Phật tử ${user} tiêu trừ nghiệp chướng, tăng trưởng phước thọ, vạn sự cát tường như ý.`
+                };
             } else if (actionType === "donate_lamp") {
                 const offeringName = payload.offering_name || "ĐÈN HOA ĐĂNG LIÊN HOA";
                 const diamonds = parseInt(payload.diamonds || 5, 10);
@@ -2657,40 +2984,24 @@
                     user: user,
                     gift_name: offeringName,
                     merit_added: meritAdded,
-                    pop_qr_spotlight: true,
+                    pop_qr_spotlight: false,
                     fortune: fortune,
                     highlight_btn: "lamp",
                     global_stats: stats,
                     tts_url: lampVoice,
-                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức vô lượng của Phật tử ${user} đã phát tâm ủng hộ hương đèn, dâng lễ ${offeringName} cúng dường Tam Bảo. Nguyện hồi hướng công đức lành này cho Phật tử ${user} cùng gia quyến phúc lộc viên mãn, vạn sự hanh thông.`
+                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức vô lượng của Phật tử ${user} đã phát tâm dâng lễ ${offeringName} cúng dường Tam Bảo. Nguyện hồi hướng công đức lành này cho Phật tử ${user} cùng gia quyến phúc lộc viên mãn, vạn sự hanh thông.`
                 };
             } else {
-                const lower = text.toLowerCase();
-                const asksQr = lower.includes("qr") || lower.includes("stk") || lower.includes("tài khoản") || lower.includes("chuyển khoản") || lower.includes("hương đèn") || lower.includes("cúng dường");
                 const stats = updateCloudGlobalStats(user, 5, 1);
-                if (asksQr) {
-                    ev = {
-                        type: "GIFT",
-                        user: user,
-                        gift_name: "THỈNH MÃ QR HƯƠNG ĐÈN TAM BẢO",
-                        merit_added: 20,
-                        pop_qr_spotlight: true,
-                        highlight_btn: "lamp",
-                        global_stats: stats,
-                        tts_url: "static/audio/tts/qr_guide.mp3?v=loud1",
-                        tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} muốn phát tâm công đức hương đèn Tam Bảo xin hoan hỷ quét mã Q R V P Bank trên màn hình, số tài khoản 6 1 4 5 7 7 8 0 8, chủ tài khoản Nguyễn Bá Vương.`
-                    };
-                } else {
-                    ev = {
-                        type: "COMMENT",
-                        user: user,
-                        text: text,
-                        avatar_type: avatarType,
-                        global_stats: stats,
-                        tts_url: "static/audio/tts/incense_1.mp3?v=loud1",
-                        tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm gửi lời nguyện cầu: ${cleanWish}. Chúc Phật tử ${user} sở cầu như ý.`
-                    };
-                }
+                ev = {
+                    type: "COMMENT",
+                    user: user,
+                    text: text,
+                    avatar_type: avatarType,
+                    global_stats: stats,
+                    tts_url: "static/audio/tts/incense_1.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm gửi lời nguyện cầu: ${cleanWish}. Chúc Phật tử ${user} sở cầu như ý.`
+                };
             }
 
             if (ev) {
@@ -2718,19 +3029,6 @@
             const initSt = loadCloudGlobalStats();
             handleLiveEvent({ type: "INIT_STATS", global_stats: initSt });
         }, 120);
-
-        // Tự động chạy phụ đề 84 câu Chú Đại Bi đồng bộ với giọng tụng của TT. Thích Trí Thoát khi chạy trên GitHub Pages
-        setInterval(() => {
-            if (wsLocalConnected) return;
-            const verse = CLOUD_CHU_DAI_BI_VERSES[cloudVerseIdx % CLOUD_CHU_DAI_BI_VERSES.length];
-            cloudVerseIdx++;
-            handleLiveEvent({
-                type: "CHOIR_CHANT",
-                title: "Tụng Chú Đại Bi (TT. Thích Trí Thoát)",
-                text: verse,
-                short_chant: verse.length > 34 ? verse.substring(0, 34) + "…" : verse
-            });
-        }, 6800);
 
         async function sendDirectChat() {
             unlockAndTestAudio();
@@ -3004,6 +3302,7 @@
                 incense: "btn-action-incense",
                 meditate: "btn-action-meditate",
                 move: "btn-action-move",
+                release: "btn-action-release",
                 name: "btn-action-name",
                 fortune: "btn-action-fortune",
                 lamp: "btn-action-lamp"
@@ -3014,14 +3313,38 @@
             setTimeout(() => el.classList.remove("flash-active"), 950);
         }
 
+        window.selectReleaseCreatureCard = function(cardEl) {
+            if (!cardEl) return;
+            const val = cardEl.getAttribute("data-val");
+            const sel = document.getElementById("sel-release-creature");
+            if (sel && val) sel.value = val;
+            document.querySelectorAll("#release-cards-grid .release-item-card").forEach(el => {
+                el.classList.toggle("active", el === cardEl);
+            });
+        };
+
+        window.syncReleaseCardHighlight = function(val) {
+            document.querySelectorAll("#release-cards-grid .release-item-card").forEach(el => {
+                el.classList.toggle("active", el.getAttribute("data-val") === val);
+            });
+        };
+
         const MODAL_PRESETS = {
             name: {
                 title: "✍️ ĐẶT TÊN CỦA BẠN & CHỌN TRANG PHỤC",
-                guide: "Đặt tên một lần để hiển thị dưới lưng nhân vật Áo Tràng Lam của bạn và bấm Thắp Hương, Ngồi Thiền, Đổi Chỗ, Chat trực tiếp:",
+                guide: "Đặt tên một lần để hiển thị dưới lưng nhân vật Áo Tràng Lam của bạn và bấm Thắp Hương, Ngồi Thiền, Phóng Sinh, Chat trực tiếp:",
                 wishLabel: "🪷 Lời cầu nguyện hiển thị trên đầu nhân vật:",
                 wishPlaceholder: "VD: Cầu bình an, may mắn, vượt qua kỳ thi...",
                 btnText: "✍️ LƯU TÊN & HIỆN TRÊN CHÁNH ĐIỆN NGAY",
                 chips: ["Nam Mô A Di Đà Phật", "cầu cho con trúng 2 tỷ vé số", "cho con vượt qua hết môn 🌷🌷", "Cầu gia đạo bình an"]
+            },
+            release: {
+                title: "🕊️ PHÓNG SINH TẠI CHỖ NGỒI CHÁNH ĐIỆN",
+                guide: "Chọn vật phóng sinh bên dưới để đàn chim lành, hạc vàng, cá chép hóa rồng bay vút lên trực tiếp từ chỗ ngồi của bạn:",
+                wishLabel: "🕊️ Lời nguyện cầu hồi hướng công đức phóng sinh:",
+                wishPlaceholder: "VD: Con xin phóng sinh cầu gia đạo bình an, sức khỏe trường thọ...",
+                btnText: "🕊️ PHÓNG SINH TẠI CHỖ NGỒI NGAY",
+                chips: ["Cầu bình an sức khỏe", "Tiêu trừ nghiệp chướng", "Cha mẹ trường thọ", "Công danh đỗ đạt", "Gia đạo hòa hợp"]
             },
             fortune: {
                 title: "🎋 XIN QUẺ ĐẦU NĂM & LUẬN GIẢI AI",
@@ -3032,12 +3355,12 @@
                 chips: ["Xin quẻ Tài Lộc", "Xin quẻ Thi Cử Học Tập", "Xin quẻ Kinh Doanh", "Xin quẻ Gia Đạo", "Xin quẻ Tình Duyên"]
             },
             lamp: {
-                title: "🏮 ỦNG HỘ HƯƠNG ĐÈN & CÔNG ĐỨC TAM BẢO",
-                guide: "Chọn vật phẩm dâng lễ để thả Đèn Hoa Đăng Liên Hoa và nhân vật tiến lên thảm đỏ dâng lễ Tam Bảo:",
+                title: "🏮 DÂNG HƯƠNG ĐÈN & HOA ĐĂNG TAM BẢO",
+                guide: "Chọn lễ vật dâng cúng để thả Đèn Hoa Đăng Liên Hoa và nhân vật tiến lên Đỉnh Đồng lễ Phật:",
                 wishLabel: "🏮 Lời hồi hướng công đức:",
-                wishPlaceholder: "VD: Con xin cúng dường đèn hoa đăng cầu quốc thái dân an...",
+                wishPlaceholder: "VD: Con xin dâng đèn hoa đăng cầu quốc thái dân an, gia đình hạnh phúc...",
                 btnText: "🏮 THẢ ĐÈN HOA ĐĂNG & DÂNG HƯƠNG ĐÈN NGAY",
-                chips: []
+                chips: ["Cầu gia đạo bình an", "Vạn sự hanh thông", "Tâm sáng trí minh", "Sở cầu như ý"]
             }
         };
 
@@ -3054,8 +3377,14 @@
             document.getElementById("btn-modal-submit").innerText = preset.btnText;
 
             document.getElementById("field-avatar-select").style.display = (mode === "name") ? "block" : "none";
+            const relField = document.getElementById("field-release-select");
+            if (relField) relField.style.display = (mode === "release") ? "block" : "none";
             document.getElementById("field-lamp-select").style.display = (mode === "lamp") ? "block" : "none";
-            document.getElementById("field-wish-input").style.display = (mode === "lamp") ? "none" : "block";
+            document.getElementById("field-wish-input").style.display = "block";
+
+            // Luôn đóng gọn hộp QR tùy chọn khi mới mở mục Hương Đèn để không gây phản cảm
+            const qrBox = document.getElementById("discreet-qr-box");
+            if (qrBox) qrBox.style.display = "none";
 
             const chipsBox = document.getElementById("quick-wish-chips");
             chipsBox.innerHTML = preset.chips.map(c =>
@@ -3099,10 +3428,20 @@
             let actionType = "set_name";
             let offeringName = "ĐÈN HOA ĐĂNG LIÊN HOA";
             let diamonds = 3;
+            let releaseName = "Đôi Chim Bồ Câu Trắng";
+            let creatureCode = "dove";
+            let meritAdded = 25;
 
             if (activeModalMode === "name") actionType = "set_name";
             else if (activeModalMode === "fortune") actionType = "ask_fortune";
-            else if (activeModalMode === "lamp") {
+            else if (activeModalMode === "release") {
+                actionType = "release_life";
+                const rawRel = document.getElementById("sel-release-creature").value || "Đôi Chim Bồ Câu Trắng|dove|25";
+                const rParts = rawRel.split("|");
+                releaseName = rParts[0] || "Đôi Chim Bồ Câu Trắng";
+                creatureCode = rParts[1] || "dove";
+                meritAdded = parseInt(rParts[2] || "25", 10);
+            } else if (activeModalMode === "lamp") {
                 actionType = "donate_lamp";
                 const rawLamp = document.getElementById("sel-lamp-offering").value || "ĐÈN HOA ĐĂNG LIÊN HOA|3";
                 const parts = rawLamp.split("|");
@@ -3117,7 +3456,10 @@
                 text: wishInput,
                 avatar_type: avatarType,
                 offering_name: offeringName,
-                diamonds: diamonds
+                diamonds: diamonds,
+                release_name: releaseName,
+                creature_code: creatureCode,
+                merit_added: meritAdded
             });
         }
 
@@ -3212,22 +3554,35 @@
                 enqueueFortuneModal(data.user, data.fortune);
                 if (data.audio) enqueueAudio(data.audio);
             }
+            else if (data.type === "LIFE_RELEASE") {
+                const relTitle = data.release_name || "Đôi Chim Bồ Câu Trắng";
+                const cCode = data.creature_code || "dove";
+                const banner = document.getElementById("gift-banner");
+                document.getElementById("gift-title").innerText = `🕊️ PHÓNG SINH: ${relTitle.toUpperCase()} 🕊️`;
+                document.getElementById("gift-desc").innerText = `${data.user} phóng sinh từ chỗ ngồi • +${data.merit_added || 25} Công Đức`;
+                banner.classList.add("active");
+                clearTimeout(bannerTimeout);
+                bannerTimeout = setTimeout(() => banner.classList.remove("active"), 4200);
+
+                playLifeReleaseChime();
+                spawnOrUpdateDevotee(data.user, data.text || `Phóng sinh ${relTitle}`, data.avatar_type || "female", false, "SIT_MEDITATE");
+                spawnLifeReleaseAtSeat(data.user, cCode, relTitle);
+                appendChatMessage(data.user, `🕊️ [Phóng sinh tại chỗ ngồi]: ${relTitle} — ${data.text || 'Cầu bình an phước thọ'} (+${data.merit_added || 25} CĐ)`, data.user === myName);
+                spawnLotusLantern(data.user);
+                if (data.audio) enqueueAudio(data.audio);
+            }
             else if (data.type === "GIFT") {
                 const banner = document.getElementById("gift-banner");
                 document.getElementById("gift-title").innerText = `🏮 ${data.gift_name} 🏮`;
-                document.getElementById("gift-desc").innerText = `${data.user} ủng hộ hương đèn • +${data.merit_added} Công Đức`;
+                document.getElementById("gift-desc").innerText = `${data.user} dâng hương đèn Tam Bảo • +${data.merit_added} Công Đức`;
                 banner.classList.add("active");
 
                 clearTimeout(bannerTimeout);
                 bannerTimeout = setTimeout(() => banner.classList.remove("active"), 4500);
 
-                if (data.pop_qr_spotlight) {
-                    showQrSpotlightCard(8500);
-                }
-
                 playTempleBell(1.35);
                 spawnOrUpdateDevotee(data.user, `Dâng ${data.gift_name}`, "high_monk", true, "STAND_INCENSE");
-                appendChatMessage(data.user, `🏮 Cúng dường ${data.gift_name} (+${data.merit_added} CĐ)`, data.user === myName);
+                appendChatMessage(data.user, `🏮 Dâng ${data.gift_name} (+${data.merit_added} CĐ)`, data.user === myName);
                 spawnLotusLantern(data.user);
                 spawnLotusLantern(data.user);
                 spawnLotusLantern(data.user);

@@ -80,8 +80,9 @@
                 <button class="btn-success" onclick="simulateActionBtn('sit_meditate')">🧘 2. Ngồi Thiền Tại Chỗ</button>
                 <button class="btn-primary" style="background:#0284c7; color:#fff;" onclick="simulateActionBtn('change_seat')">🔄 3. Đổi Chỗ Gần Phật</button>
                 <button class="btn-primary" style="background:#8b5cf6; color:#fff;" onclick="simulateActionBtn('set_name')">✍️ 4. Đặt Tên</button>
-                <button class="btn-primary" onclick="simulateActionBtn('ask_fortune')">🎋 5. Xin Quẻ AI</button>
-                <button class="btn-danger" onclick="simulateActionBtn('donate_lamp')">🏮 6. Ủng Hộ Hương Đèn</button>
+                <button class="btn-primary" style="background:#0d9488; color:#fff;" onclick="simulateActionBtn('release_life')">🕊️ 5. Phóng Sinh Tại Chỗ</button>
+                <button class="btn-primary" onclick="simulateActionBtn('ask_fortune')">🎋 6. Xin Quẻ AI</button>
+                <button class="btn-danger" onclick="simulateActionBtn('donate_lamp')">🏮 7. Dâng Hương Đèn</button>
             </div>
         </div>
 
@@ -422,10 +423,15 @@
                     tts_url: "static/audio/tts/fortune_01.mp3?v=loud1",
                     tts_text: `Nam Mô A Di Đà Phật. Phật tử ${user} thành tâm xin quẻ xăm: ${text}. Chúc mừng Phật tử ${user} đã rút được Quẻ Số 01, Thượng Thượng Cát, Long Môn Vũ Hóa. Đại cát đại lợi, mọi dự định đều gặp vận hội lớn.`
                 },
+                release_life: {
+                    type: "LIFE_RELEASE", user, text, avatar_type: "high_monk", release_name: "Đôi Chim Bồ Câu Trắng", creature_code: "dove", merit_added: 25, highlight_btn: "release",
+                    tts_url: "static/audio/tts/release_1.mp3?v=loud1",
+                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức phóng sinh vô lượng của Phật tử ${user} đã phát tâm phóng sinh Đôi Chim Bồ Câu Trắng ngay tại chỗ ngồi trên Chánh Điện, nguyện cầu: ${text}. Chúc Phật tử ${user} tiêu trừ nghiệp chướng, phước thọ tăng long.`
+                },
                 donate_lamp: {
-                    type: "GIFT", user, gift_name: "ĐÈN HOA ĐĂNG LIÊN HOA", merit_added: 100, pop_qr_spotlight: true, highlight_btn: "lamp",
+                    type: "GIFT", user, gift_name: "ĐÈN HOA ĐĂNG LIÊN HOA", merit_added: 100, pop_qr_spotlight: false, highlight_btn: "lamp",
                     tts_url: "static/audio/tts/lamp_1.mp3?v=loud1",
-                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức vô lượng của Phật tử ${user} đã phát tâm ủng hộ hương đèn, dâng Đèn Hoa Đăng Liên Hoa cúng dường Tam Bảo. Chúc Phật tử ${user} phúc lộc viên mãn.`
+                    tts_text: `Nam Mô A Di Đà Phật. Tán thán công đức vô lượng của Phật tử ${user} đã phát tâm dâng Đèn Hoa Đăng Liên Hoa cúng dường Tam Bảo. Chúc Phật tử ${user} phúc lộc viên mãn.`
                 }
             };
             if (mapEvent[actionType]) {
@@ -476,7 +482,7 @@
                 user: donorName,
                 gift_name: `CÚNG DƯỜNG HƯƠNG ĐÈN (${amountVnd.toLocaleString('vi-VN')}đ)`,
                 merit_added: meritAdded,
-                pop_qr_spotlight: true,
+                pop_qr_spotlight: false,
                 highlight_btn: "lamp",
                 fortune: {
                     id: "Quẻ Công Đức",
