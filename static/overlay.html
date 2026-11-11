@@ -12,7 +12,6 @@
             document.head.appendChild(baseEl);
         }
     </script>
-    <link rel="preload" as="audio" href="static/audio/tung_kinh_fast_start.mp3?v=fast1">
     <link rel="preload" as="image" href="static/buddha_temple_3d.jpg?v=daihung_cranes_v3">
     <script src="static/three.min.js"></script>
     <style>
@@ -422,8 +421,8 @@
     </style>
 </head>
 <body>
-    <!-- PHÁT NGAY TIẾNG GÕ MÕ & TỤNG KINH TỪ MILI-GIÂY ĐẦU TIÊN KHI TRUY CẬP (FILE 177KB NẠP TỨC THÌ 0ms) -->
-    <audio id="instant-sutra-audio" src="static/audio/tung_kinh_fast_start.mp3?v=fast1" preload="auto" autoplay loop playsinline webkit-playsinline style="display:none;"></audio>
+    <!-- PHÁT TRỰC TIẾP TOÀN BỘ BẢN TỤNG KINH CHÚ ĐẠI BI DÀI ĐẦY ĐỦ THEO LINK YOUTUBE GỐC (KHÔNG CẮT ĐOẠN) -->
+    <audio id="instant-sutra-audio" src="static/audio/tung_kinh_chu_dai_bi.mp3?v=full_youtube" preload="auto" autoplay loop playsinline webkit-playsinline style="display:none;"></audio>
 
     <!-- LỚP CANVAS 3D WEBGL (HỖ TRỢ BẤM TRỰC TIẾP LÊN SÀN ĐỂ ĐỔI CHỖ HOẶC BẤM VÀO PHẬT TỬ ĐỂ CHAT) -->
     <canvas id="webgl-canvas" title="Bấm vào đệm ngồi bất kỳ để đi bộ tới đó, hoặc bấm vào Phật tử khác để trò chuyện"></canvas>
@@ -1997,26 +1996,7 @@
             return sharedAudioCtx;
         }
 
-        let fullSutraLoopPlayer = null;
-        let fullSutraReady = false;
         let wasDuckingRecently = false;
-
-        function ensureFullSutraPreloaded() {
-            if (fullSutraLoopPlayer) return;
-            try {
-                fullSutraLoopPlayer = new Audio("static/audio/tung_kinh_chu_dai_bi.mp3?v=fast1");
-                fullSutraLoopPlayer.preload = "auto";
-                fullSutraLoopPlayer.loop = true;
-                fullSutraLoopPlayer.playsInline = true;
-                fullSutraLoopPlayer.setAttribute("playsinline", "true");
-                fullSutraLoopPlayer.setAttribute("webkit-playsinline", "true");
-                fullSutraLoopPlayer.addEventListener("canplaythrough", () => {
-                    fullSutraReady = true;
-                }, { once: true });
-                fullSutraLoopPlayer.load();
-            } catch (e) {}
-        }
-        setTimeout(ensureFullSutraPreloaded, 900);
 
         function syncMp3Players() {
             if (!ambientAudioStarted) return;
@@ -2048,7 +2028,7 @@
                 const isTamKinh = (mode === "mp3_tam_kinh");
                 const targetSrc = isTamKinh
                     ? "static/audio/niem_phat.mp3?v=2"
-                    : "static/audio/tung_kinh_fast_start.mp3?v=fast1";
+                    : "static/audio/tung_kinh_chu_dai_bi.mp3?v=full_youtube";
                 if (!bgSutraMp3Player) {
                     const domInstant = !isTamKinh ? document.getElementById("instant-sutra-audio") : null;
                     bgSutraMp3Player = domInstant || new Audio(targetSrc);
@@ -2056,25 +2036,6 @@
                     bgSutraMp3Player.playsInline = true;
                     bgSutraMp3Player.setAttribute("playsinline", "true");
                     bgSutraMp3Player.setAttribute("webkit-playsinline", "true");
-                    if (!isTamKinh) {
-                        bgSutraMp3Player.addEventListener("timeupdate", () => {
-                            if (fullSutraReady && fullSutraLoopPlayer && bgSutraMp3Player !== fullSutraLoopPlayer && bgSutraMp3Player.currentTime >= 16.8) {
-                                try {
-                                    const curT = bgSutraMp3Player.currentTime;
-                                    const curV = bgSutraMp3Player.volume;
-                                    const wasPaused = bgSutraMp3Player.paused;
-                                    fullSutraLoopPlayer.currentTime = curT;
-                                    fullSutraLoopPlayer.volume = curV;
-                                    if (!wasPaused && !isVoiceDuckingActive()) {
-                                        fullSutraLoopPlayer.play().then(() => {
-                                            bgSutraMp3Player.pause();
-                                            bgSutraMp3Player = fullSutraLoopPlayer;
-                                        }).catch(() => {});
-                                    }
-                                } catch (e) {}
-                            }
-                        });
-                    }
                 } else if (isTamKinh && !bgSutraMp3Player.src.includes("niem_phat.mp3")) {
                     bgSutraMp3Player.pause();
                     bgSutraMp3Player = new Audio(targetSrc);
@@ -2083,9 +2044,7 @@
                     bgSutraMp3Player.setAttribute("playsinline", "true");
                 } else if (!isTamKinh && bgSutraMp3Player.src.includes("niem_phat.mp3")) {
                     bgSutraMp3Player.pause();
-                    bgSutraMp3Player = (fullSutraReady && fullSutraLoopPlayer)
-                        ? fullSutraLoopPlayer
-                        : (document.getElementById("instant-sutra-audio") || new Audio(targetSrc));
+                    bgSutraMp3Player = document.getElementById("instant-sutra-audio") || new Audio(targetSrc);
                     bgSutraMp3Player.loop = true;
                 }
                 const baseChant = Math.min(1.0, Math.max(0.25, (audioSettings.chant_volume || 1.5) * 0.68));
@@ -2106,7 +2065,7 @@
                     }
                 } else {
                     if (!wasDuckingRecently) {
-                        // Khi mới vào trang: phát ngay ở mức âm lượng chuẩn 100% từ mili-giây 0 (không chờ fade-in)
+                        // Khi mới vào trang: phát ngay ở mức âm lượng chuẩn 100% từ đầu (không chờ fade-in)
                         try { bgSutraMp3Player.volume = baseChant; } catch (e) {}
                     }
                     if (bgSutraMp3Player.paused) {
@@ -2361,51 +2320,9 @@
             } catch (e) {}
         }
 
-        // Tiếng gõ mõ gỗ mít chùa cổ trầm ấm ("cốc... cốc...") vang lên ngay lập tức khi vào trang
-        function playWoodenFishSound(volScale = 1.0) {
-            if (isVoiceDuckingActive()) return;
-            try {
-                const ctx = getAudioCtx();
-                if (!ctx || ctx.state !== "running") return;
-                const now = ctx.currentTime;
-
-                // Thân mõ gỗ rỗng trầm ấm (420Hz -> 385Hz)
-                const bodyOsc = ctx.createOscillator();
-                const bodyGain = ctx.createGain();
-                bodyOsc.type = "triangle";
-                bodyOsc.frequency.setValueAtTime(425, now);
-                bodyOsc.frequency.exponentialRampToValueAtTime(385, now + 0.085);
-                bodyGain.gain.setValueAtTime(0.001, now);
-                bodyGain.gain.linearRampToValueAtTime(0.28 * volScale, now + 0.006);
-                bodyGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.14);
-                bodyOsc.connect(bodyGain);
-                bodyGain.connect(masterCompressor);
-                bodyOsc.start(now);
-                bodyOsc.stop(now + 0.15);
-
-                // Âm bồi dùi gỗ gõ vào miệng mõ (840Hz)
-                const rimOsc = ctx.createOscillator();
-                const rimGain = ctx.createGain();
-                rimOsc.type = "sine";
-                rimOsc.frequency.setValueAtTime(845, now);
-                rimOsc.frequency.exponentialRampToValueAtTime(760, now + 0.045);
-                rimGain.gain.setValueAtTime(0.001, now);
-                rimGain.gain.linearRampToValueAtTime(0.14 * volScale, now + 0.003);
-                rimGain.gain.exponentialRampToValueAtTime(0.0005, now + 0.055);
-                rimOsc.connect(rimGain);
-                rimGain.connect(masterCompressor);
-                rimOsc.start(now);
-                rimOsc.stop(now + 0.06);
-            } catch (e) {}
-        }
-
-        function playWoodenFishBurst(beats = 3, intervalMs = 460) {
-            for (let i = 0; i < beats; i++) {
-                setTimeout(() => {
-                    if (!isVoiceDuckingActive()) playWoodenFishSound(0.95);
-                }, i * intervalMs);
-            }
-        }
+        // Đã tắt tiếng gõ mõ điện tử để phát nguyên bản 100% file Tụng Kinh Chú Đại Bi YouTube gốc
+        function playWoodenFishSound() {}
+        function playWoodenFishBurst() {}
 
         function playLifeReleaseChime() {
             try {
@@ -2521,25 +2438,15 @@
         }
 
         // =========================================================================
-        // 11. PHÁT TIẾNG GÕ MÕ & TỤNG KINH MẶC ĐỊNH TỨC THÌ NGAY KHI TRUY CẬP (0ms)
+        // 11. PHÁT TOÀN BỘ BẢN TỤNG KINH CHÚ ĐẠI BI DÀI ĐẦY ĐỦ MẶC ĐỊNH TỰ ĐỘNG NGAY KHI VÀO TRANG
         // =========================================================================
         let ambientAudioStarted = false;
-        let initialWoodenFishDone = false;
         function startAmbientMeditationMusic() {
             ambientAudioStarted = true;
             syncMp3Players();
-            if (!initialWoodenFishDone && !isVoiceDuckingActive()) {
-                try {
-                    const ctx = getAudioCtx();
-                    if (ctx && ctx.state === "running") {
-                        initialWoodenFishDone = true;
-                        playWoodenFishBurst(4, 460);
-                    }
-                } catch (e) {}
-            }
         }
 
-        // Tự động phát tiếng gõ mõ & tụng kinh mặc định ngay lập tức ở mili-giây 0 khi mở trang
+        // Tự động phát kinh mặc định ngay lập tức khi mở trang
         startAmbientMeditationMusic();
         window.addEventListener("DOMContentLoaded", () => {
             startAmbientMeditationMusic();
@@ -2557,7 +2464,7 @@
         ["pointerdown", "pointermove", "mouseover", "touchstart", "touchmove", "touchend", "wheel", "scroll", "keydown", "click"].forEach((evtName) => {
             window.addEventListener(evtName, () => {
                 unlockMobileVoicePlayers();
-                if (!initialWoodenFishDone || !ambientAudioStarted || (bgSutraMp3Player && bgSutraMp3Player.paused && !isVoiceDuckingActive())) {
+                if (!ambientAudioStarted || (bgSutraMp3Player && bgSutraMp3Player.paused && !isVoiceDuckingActive())) {
                     unlockAndTestAudio();
                 }
             }, { passive: true });
